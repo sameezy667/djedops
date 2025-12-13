@@ -93,7 +93,14 @@ body::after {
     opacity: 1;
   }
   50% {
-    opacity: 0.85;
+    opacity: 0.95;
+  }
+}
+
+/* Disable aggressive animations on mobile */
+@media (max-width: 768px) {
+  body {
+    animation: panGrid 120s linear infinite;
   }
 }
 

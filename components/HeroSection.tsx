@@ -59,7 +59,7 @@ export function HeroSection({
             {/* Massive Title */}
             <div className="mb-2 md:mb-8">
               {/* Title - Left Aligned */}
-              <h1 className="font-display font-black text-left mb-1 md:mb-4 title-flicker" style={{ fontSize: 'clamp(1.5rem, 7vw, 8rem)', lineHeight: '0.9', letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 25px rgba(57, 255, 20, 0.3))' }}>
+              <h1 className="font-display font-black text-left mb-1 md:mb-4" style={{ fontSize: 'clamp(1.5rem, 7vw, 8rem)', lineHeight: '0.9', letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 25px rgba(57, 255, 20, 0.3))' }}>
                 <span className="text-white">DJED</span>
                 <br />
                 <span className="text-bloom-green" style={{ WebkitTextStroke: '1.5px #39FF14', WebkitTextFillColor: 'transparent' }}>OPS</span>
