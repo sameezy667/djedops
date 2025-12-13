@@ -93,7 +93,7 @@ export function WhitePaperModal({ isOpen, onClose }: WhitePaperModalProps) {
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(85vh-200px)]">
+              <div className="p-6 overflow-y-auto max-h-[calc(85vh-160px)]">
                 {/* Tab: The Djed Protocol */}
                 {activeTab === 'protocol' && (
                   <motion.div
@@ -314,7 +314,7 @@ export function WhitePaperModal({ isOpen, onClose }: WhitePaperModalProps) {
                     Code is Open Source.
                   </p>
                   <a
-                    href="https://github.com/yourusername/djedops"
+                    href="https://github.com/sameezy667/DjedOPS-"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-6 py-2 bg-[#39FF14]/10 border border-[#39FF14] text-[#39FF14] hover:bg-[#39FF14] hover:text-black font-mono text-sm uppercase tracking-wider transition-all duration-300"
