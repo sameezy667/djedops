@@ -39,8 +39,9 @@ async function fetchDexPrice(): Promise<DexPriceResponse> {
 /**
  * Hook to fetch DEX price and calculate arbitrage opportunity
  * Fetches live price from Spectrum Finance DEX
+ * Note: Protocol price is hardcoded to $1.00 (DJED stablecoin peg)
  */
-export function useDexPrice(protocolPrice: number) {
+export function useDexPrice() {
   const isDemoMode = useAppStore((state) => state.isDemoMode);
   
   const { data: dexData, error } = useSWR<DexPriceResponse>(

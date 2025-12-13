@@ -96,7 +96,7 @@ export default function Home() {
   const djedData = useReplayData(rawDjedData);
 
   // Fetch DEX price for DSI calculation
-  const { dexPrice, isError: dexError } = useDexPrice(djedData?.oraclePrice ?? 1.0);
+  const { dexPrice, isError: dexError } = useDexPrice();
 
   // Track last successful updates
   useEffect(() => {

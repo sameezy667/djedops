@@ -39,7 +39,7 @@ function generateSpectrumUrl(signal: string): string | null {
  * Now includes one-click trade execution via Spectrum Finance.
  */
 export function MarketOpportunityCard({ protocolPrice }: MarketOpportunityCardProps) {
-  const { dexPrice, spread, spreadPercent, signal, isLoading, liquidity, source } = useDexPrice(protocolPrice);
+  const { dexPrice, spread, spreadPercent, signal, isLoading, liquidity, source } = useDexPrice();
 
   // Signal styling
   const signalStyles = {

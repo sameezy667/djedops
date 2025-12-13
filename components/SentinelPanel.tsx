@@ -24,7 +24,7 @@ export function SentinelToggle() {
   // Always call hooks unconditionally - this is required by React Rules of Hooks
   const { data: djedData } = useDjedData();
   const protocolPrice = djedData?.oraclePrice || 0;
-  const dexPriceData = useDexPrice(protocolPrice);
+  const dexPriceData = useDexPrice();
   const dexPrice = dexPriceData.dexPrice;
 
   // Notification permission is checked when needed during monitoring
