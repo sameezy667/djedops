@@ -3,9 +3,7 @@
 import { motion } from 'framer-motion';
 import { useWallet } from '@/lib/hooks/useWallet';
 
-export interface WalletConnectProps {
-  // Component now uses useWallet hook internally
-}
+export type WalletConnectProps = Record<string, never>;
 
 /**
  * WalletConnect - Button component for connecting to Nautilus wallet

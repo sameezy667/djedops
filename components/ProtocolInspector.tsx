@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { X } from 'lucide-react';
 
 interface ProtocolInspectorProps {
@@ -171,12 +170,9 @@ object DjedProtocol {
             <code className="text-gray-300">
               {protocolCode.split('\n').map((line, i) => {
                 // Syntax highlighting
-                let coloredLine = line;
                 const isComment = line.trim().startsWith('//');
                 const isDocComment = line.trim().startsWith('*') || line.trim().startsWith('/**');
                 const hasKeyword = /\b(val|def|object|if|else|true|false|return)\b/.test(line);
-                const hasNumber = /\d+/.test(line);
-                const hasString = /"[^"]*"/.test(line);
                 
                 return (
                   <div key={i} className="hover:bg-cyan-500/5 px-2 -mx-2 transition-colors">

@@ -127,7 +127,7 @@ export function TerminalFeed({ events, maxHeight = 300, isLoading = false }: Ter
       <div className="border-b border-[#39FF14]/30 pb-2 mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="text-[#39FF14] text-xs font-bold tracking-wider">DJED_PROTOCOL_V1.0</span>
-          <span className="text-[#39FF14]/50 text-xs">///</span>
+          <span className="text-[#39FF14]/50 text-xs">{'///'}</span>
           <span className="text-[#39FF14]/70 text-xs">TRANSACTION_LOG</span>
         </div>
         

@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
 import type { SimulationScenario } from '@/lib/types';
 
 export interface ScenarioControlsProps {

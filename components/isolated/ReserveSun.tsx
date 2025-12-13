@@ -40,7 +40,7 @@ export interface ReserveSunProps {
  * - High perf: SphereGeometry(1, 16, 16), no shadows, skip frames
  * - Visual mode: SphereGeometry(1, 64, 64), full shadows, 60fps
  */
-export function ReserveSun({ reserveRatio, systemStatus, isPaused = false }: ReserveSunProps) {
+export function ReserveSun({ reserveRatio, isPaused = false }: ReserveSunProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const highPerformanceMode = useAppStore((state) => state.highPerformanceMode);
   const shouldPause = isPaused || prefersReducedMotion;

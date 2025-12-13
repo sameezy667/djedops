@@ -28,7 +28,7 @@ import { TransactionEvent, SimulationScenario } from '@/lib/types';
 import { calculateReserveRatio, determineSystemStatus } from '@/lib/calculations';
 import { calculateDSI } from '@/lib/utils/dsiCalculator';
 import { useDexPrice } from '@/lib/hooks/useDexPrice';
-import { API_CONFIG, BLOCKCHAIN, SIMULATION, RESERVE_RATIO } from '@/lib/constants';
+import { API_CONFIG, BLOCKCHAIN, RESERVE_RATIO } from '@/lib/constants';
 
 // Dynamically import HeroSection to avoid SSR issues with React Three Fiber
 const HeroSection = dynamic(() => import('../components/HeroSection').then(mod => ({ default: mod.HeroSection })), {
@@ -60,10 +60,10 @@ export default function Home() {
   const { transactions: liveTransactions, error: feedError, isLoading: feedLoading } = useTransactionFeed();
 
   useEffect(() => {
-    // Check for demo mode on client side or default to demo mode
+    // Check for demo mode on client side - only use demo if explicitly requested
     const urlDemoMode = DemoService.isDemoMode();
-    // Default to demo mode if no URL parameter specified
-    const shouldUseDemoMode = urlDemoMode || typeof window !== 'undefined' && !window.location.search.includes('demo=false');
+    // Default to LIVE mode unless demo=true is specified
+    const shouldUseDemoMode = urlDemoMode && typeof window !== 'undefined' && window.location.search.includes('demo=true');
     setIsDemoMode(shouldUseDemoMode);
     
     // Load transactions if in demo mode, otherwise use live transactions
@@ -136,7 +136,6 @@ export default function Home() {
     toggleSimulationModal, 
     isSimulating,
     simulatedPrice,
-    simulationScenario,
     sentinelConfig,
     sentinelTriggered,
     startSimulation,
@@ -211,7 +210,7 @@ export default function Home() {
     stopSimulation();
   };
 
-  const handleSimulatedPriceChange = (price: number, ratio: number, status: 'NORMAL' | 'CRITICAL') => {
+  const handleSimulatedPriceChange = (price: number) => {
     updateSimulatedPrice(price);
   };
 

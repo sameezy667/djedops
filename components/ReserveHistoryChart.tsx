@@ -96,7 +96,7 @@ export default function ReserveHistoryChart() {
     },
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string }; value: number }> }) => {
     if (active && payload && payload[0]) {
       return (
         <div className="bg-black/90 border border-[#39FF14]/30 px-3 py-2 rounded font-mono">

@@ -27,13 +27,6 @@ export default function StressTest() {
   const isLiquidationRisk = projectedRatio !== null && projectedRatio < 400;
   const hypotheticalPrice = price ? (price * (1 + sliderPercent / 100)).toFixed(2) : '0.00';
 
-  const getSliderColor = () => {
-    if (sliderPercent < -20) return 'from-red-600 to-red-400';
-    if (sliderPercent < 0) return 'from-orange-600 to-orange-400';
-    if (sliderPercent < 20) return 'from-cyan-600 to-cyan-400';
-    return 'from-green-600 to-green-400';
-  };
-
   const getRatioChangeIcon = () => {
     if (!projectedRatio || !currentRatio) return '—';
     const change = projectedRatio - currentRatio;

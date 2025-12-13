@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 // Spectrum Finance API endpoints
-const SPECTRUM_MARKETS_API = 'https://api.spectrum.fi/v1/price-tracking/markets';
 const SPECTRUM_POOL_API = 'https://api.spectrum.fi/v1/amm/pools';
 
 // Token IDs

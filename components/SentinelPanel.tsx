@@ -16,7 +16,6 @@ export function SentinelToggle() {
   const togglePanel = useAppStore((state) => state.toggleSentinelPanel);
   const setSentinelConfig = useAppStore((state) => state.setSentinelConfig);
   
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [isMonitoring, setIsMonitoring] = useState(false);
   const lastNotificationTime = useRef<{ [key: string]: number }>({});
   const pollingInterval = useRef<NodeJS.Timeout | null>(null);

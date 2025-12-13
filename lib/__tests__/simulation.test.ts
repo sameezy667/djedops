@@ -105,8 +105,7 @@ interface SimulationUIState {
 }
 
 function getSimulationUIState(
-  simulatedRatio: number,
-  simulatedStatus: 'NORMAL' | 'CRITICAL'
+  simulatedRatio: number
 ): SimulationUIState {
   if (simulatedRatio < 400) {
     return {

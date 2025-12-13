@@ -16,7 +16,7 @@ interface ErgoAPI {
   get_balance: (tokenId?: string) => Promise<string>;
   get_change_address: () => Promise<string>;
   get_used_addresses: () => Promise<string[]>;
-  get_utxos: (amount?: string, tokenId?: string) => Promise<any[]>;
+  get_utxos: (amount?: string, tokenId?: string) => Promise<unknown[]>;
 }
 
 declare global {
@@ -133,7 +133,7 @@ export function useWallet(): UseWalletReturn {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       const balance = await fetchBalance();
       setState(prev => ({ ...prev, balance, isLoading: false }));
-    } catch (error) {
+    } catch {
       setState(prev => ({
         ...prev,
         error: 'Failed to refresh balance',

@@ -67,7 +67,7 @@ export class DemoService {
       }
       
       // Catch JSON parse errors explicitly
-      let data: any;
+      let data: unknown;
       try {
         data = await response.json();
       } catch (parseError) {
