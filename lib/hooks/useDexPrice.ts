@@ -76,12 +76,12 @@ export function useDexPrice(protocolPrice: number) {
   }
 
   // Calculate arbitrage metrics with safety guards
-  const spread = effectiveDexPrice - protocolPrice;
+  // DJED is a stablecoin pegged to $1.00
+  const realProtocolPrice = 1.00;
+  const spread = effectiveDexPrice - realProtocolPrice;
   
   // Safety: Guard against division by zero
-  const spreadPercent = protocolPrice > 0 
-    ? (spread / protocolPrice) * 100 
-    : 0;
+  const spreadPercent = (spread / realProtocolPrice) * 100;
 
   // Determine signal based on thresholds
   let signal: 'MINT DJED' | 'REDEEM DJED' | 'NO CLEAR EDGE';
@@ -95,7 +95,7 @@ export function useDexPrice(protocolPrice: number) {
 
   return {
     dexPrice: effectiveDexPrice,
-    protocolPrice,
+    protocolPrice: realProtocolPrice,
     spread,
     spreadPercent,
     signal,

@@ -26,6 +26,7 @@ import { TimeTravel } from '../components/TimeTravel';
 import { useAppStore } from '@/lib/store';
 import { useDjedData } from '@/lib/hooks/useDjedData';
 import { useTransactionFeed } from '@/lib/hooks/useTransactionFeed';
+import { useReplayData } from '@/lib/hooks/useReplayData';
 import { DemoService } from '@/lib/demo-service';
 import { TransactionEvent, SimulationScenario } from '@/lib/types';
 import { calculateReserveRatio, determineSystemStatus } from '@/lib/calculations';
@@ -89,7 +90,10 @@ export default function Home() {
   }, [liveTransactions, isDemoMode]);
 
   // Fetch protocol data using useDjedData hook
-  const { data: djedData, error, isLoading, mutate } = useDjedData(isDemoMode);
+  const { data: rawDjedData, error, isLoading, mutate } = useDjedData(isDemoMode);
+  
+  // Apply replay mode data if TimeTravel is active
+  const djedData = useReplayData(rawDjedData);
 
   // Fetch DEX price for DSI calculation
   const { dexPrice, isError: dexError } = useDexPrice(djedData?.oraclePrice ?? 1.0);
@@ -495,7 +499,7 @@ export default function Home() {
             <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
               Protocol Confidence
             </h2>
-            <ConfidenceGauge dsi={displayRatio} volatility={5.2} />
+            <ConfidenceGauge dsi={displayRatio} volatility={Math.abs(spreadPercent) || 3.5} />
           </div>
 
           {/* Root Cause Analyzer */}
@@ -506,7 +510,7 @@ export default function Home() {
             <RootCauseAnalyzer 
               currentDSI={displayRatio}
               ergPrice={djedData.oraclePrice}
-              oraclePrice={djedData.oraclePrice}
+              oraclePrice={dexPrice || djedData.oraclePrice}
             />
           </div>
         </div>

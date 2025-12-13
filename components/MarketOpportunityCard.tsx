@@ -91,7 +91,7 @@ export function MarketOpportunityCard({ protocolPrice }: MarketOpportunityCardPr
         <div>
           <p className="text-[#A3A3A3] text-xs font-mono uppercase tracking-widest mb-2">PROTOCOL</p>
           <p className="text-[#E5E5E5] text-2xl sm:text-3xl font-mono font-semibold">
-            ${protocolPrice.toFixed(4)}
+            $1.0000
           </p>
         </div>
       </div>
