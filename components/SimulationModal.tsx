@@ -149,6 +149,18 @@ export function SimulationModal({
     }
   };
 
+  // Debug logging on every render
+  if (isOpen) {
+    console.log('🎯 SimulationModal RENDER:', {
+      currentPrice,
+      baseReserves,
+      sigUsdCirculation,
+      sliderValue,
+      simulatedRatio,
+      calculatedRatio: sigUsdCirculation > 0 ? (baseReserves * sliderValue) / sigUsdCirculation * 100 : 0
+    });
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
