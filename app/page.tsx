@@ -199,6 +199,12 @@ export default function Home() {
 
 
   const handleLaunchSimulation = () => {
+    console.log('🚀 Launch Simulation - djedData:', {
+      exists: !!djedData,
+      oraclePrice: djedData?.oraclePrice,
+      baseReserves: djedData?.baseReserves,
+      sigUsdCirculation: djedData?.sigUsdCirculation,
+    });
     toggleSimulationModal();
     if (!isSimulating && djedData) {
       startSimulation(djedData.oraclePrice);
@@ -510,15 +516,17 @@ export default function Home() {
         )}
 
         {/* Simulation Modal */}
-        <SimulationModal
-          isOpen={isSimulationModalOpen}
-          onClose={handleCloseSimulation}
-          currentPrice={djedData?.oraclePrice ?? 0}
-          baseReserves={djedData?.baseReserves ?? 0}
-          sigUsdCirculation={djedData?.sigUsdCirculation ?? 0}
-          onSimulatedPriceChange={handleSimulatedPriceChange}
-          onScenarioActivate={handleScenarioActivate}
-        />
+        {djedData && (
+          <SimulationModal
+            isOpen={isSimulationModalOpen}
+            onClose={handleCloseSimulation}
+            currentPrice={djedData.oraclePrice}
+            baseReserves={djedData.baseReserves}
+            sigUsdCirculation={djedData.sigUsdCirculation}
+            onSimulatedPriceChange={handleSimulatedPriceChange}
+            onScenarioActivate={handleScenarioActivate}
+          />
+        )}
 
         {/* Protocol Inspector Modal */}
         <ProtocolInspector
