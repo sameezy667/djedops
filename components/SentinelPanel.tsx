@@ -42,7 +42,6 @@ export function SentinelToggle() {
 
     if (Notification.permission !== 'denied') {
       const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
       return permission === 'granted';
     }
 
