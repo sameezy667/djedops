@@ -132,10 +132,10 @@ export function WhitePaperModal({ isOpen, onClose }: WhitePaperModalProps) {
                       </h4>
                       <p className="text-[#E5E5E5] italic mb-2">
                         [1] Zahnentferner, J. (2021). <em>Djed: A Formally Verified Crypto-Backed 
-                        Pegged Algorithmic Stablecoin.</em> IOHK Research.
+                        Pegged Algorithmic Stablecoin.</em> IACR Cryptology ePrint Archive.
                       </p>
                       <a
-                        href="https://iohk.io/en/research/library/papers/djeda-formally-verified-crypto-backed-pegged-algorithmic-stablecoin/"
+                        href="https://eprint.iacr.org/2021/1069.pdf"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#39FF14] hover:text-[#39FF14]/80 font-mono text-sm flex items-center gap-1 transition-colors"
