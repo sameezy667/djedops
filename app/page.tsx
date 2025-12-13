@@ -333,7 +333,7 @@ export default function Home() {
             </div>
             <div className="text-right">
               <div className="text-[#39FF14] text-xs font-mono uppercase">ERG Price</div>
-              <div className="text-white text-lg font-bold font-mono">${djedData.oraclePrice.toFixed(2)}</div>
+              <div className="text-white text-lg font-bold font-mono">${djedData?.oraclePrice?.toFixed(2) ?? '0.00'}</div>
             </div>
           </div>
         </div>

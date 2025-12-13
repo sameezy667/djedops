@@ -46,18 +46,18 @@ export function HeroSection({
   };
 
   return (
-    <section className="relative w-full min-h-screen py-6 md:py-12 overflow-hidden">
+    <section className="relative w-full min-h-screen py-4 md:py-12 overflow-hidden px-4 md:px-0">
       {/* Horizontal green line separator */}
       <div className="absolute top-0 left-0 right-0 h-px bg-[#39FF14]/30"></div>
       
       {/* Two-column layout: Title/Data (left 7 cols) and Reserve Visualization (right 5 cols) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 mb-8 md:mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 lg:gap-16 mb-6 md:mb-12">
         {/* Left Column: Title + Data Grid (7 columns) */}
         <div className="md:col-span-7 flex flex-col justify-center order-1">
           {/* Massive Title */}
-          <div className="mb-6 md:mb-8">
+          <div className="mb-4 md:mb-8">
             {/* Title - Left Aligned */}
-            <h1 className="font-display font-black text-left mb-3 md:mb-4 title-flicker" style={{ fontSize: 'clamp(2.5rem, 12vw, 8rem)', lineHeight: '0.85', letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 25px rgba(57, 255, 20, 0.3))' }}>
+            <h1 className="font-display font-black text-left mb-2 md:mb-4 title-flicker" style={{ fontSize: 'clamp(2rem, 10vw, 8rem)', lineHeight: '0.85', letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 25px rgba(57, 255, 20, 0.3))' }}>
               <span className="text-white">DJED</span>
               <br />
               <span className="text-bloom-green" style={{ WebkitTextStroke: '1.5px #39FF14', WebkitTextFillColor: 'transparent' }}>OPS</span>
@@ -99,11 +99,11 @@ export function HeroSection({
       </div>
 
       {/* Action Buttons - Aura Style */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-7xl mx-auto mt-8 md:mt-16">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-7xl mx-auto mt-6 md:mt-16 px-4 md:px-0">
         {/* LAUNCH SIMULATOR - Green border button */}
         <button
           onClick={onLaunchSimulation}
-          className="w-full sm:w-auto px-8 py-3 border-2 border-[#39FF14] text-[#39FF14] font-bold text-sm font-mono tracking-wider hover:bg-[#39FF14] hover:text-black transition-all duration-300 flex items-center justify-center gap-2 group"
+          className="w-full sm:w-auto px-6 sm:px-8 py-3 border-2 border-[#39FF14] text-[#39FF14] font-bold text-xs sm:text-sm font-mono tracking-wider hover:bg-[#39FF14] hover:text-black transition-all duration-300 flex items-center justify-center gap-2 group"
           aria-label="Launch price simulation modal"
         >
           <span className="text-[#39FF14] group-hover:text-black">▶</span>
@@ -114,7 +114,7 @@ export function HeroSection({
         <button
           onClick={handleViewContract}
           disabled={!contractAddress}
-          className={`w-full sm:w-auto px-8 py-3 border border-[#39FF14]/30 font-mono text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 ${
+          className={`w-full sm:w-auto px-6 sm:px-8 py-3 border border-[#39FF14]/30 font-mono text-xs sm:text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 ${
             contractAddress
               ? 'text-[#E5E5E5] hover:border-[#39FF14] hover:text-[#39FF14]'
               : 'text-[#E5E5E5]/30 cursor-not-allowed'
