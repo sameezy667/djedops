@@ -59,13 +59,6 @@ export function SimulationModal({
   // Reset slider to current price when modal opens
   useEffect(() => {
     if (isOpen) {
-      console.log('🔧 SimulationModal Initialize:', {
-        currentPrice,
-        baseReserves,
-        sigUsdCirculation,
-        sliderValue,
-        calculatedRatio: simulatedRatio
-      });
       setSliderValue(currentPrice);
     }
   }, [isOpen, currentPrice]);
