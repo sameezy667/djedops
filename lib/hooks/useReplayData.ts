@@ -33,19 +33,23 @@ export function useReplayData(liveData: DjedData | null): DjedData | null {
       return {
         baseReserves: liveData.baseReserves + (scenario.baseReserves - liveData.baseReserves) * interpolationFactor,
         sigUsdCirculation: liveData.sigUsdCirculation + (scenario.sigUsdCirculation - liveData.sigUsdCirculation) * interpolationFactor,
+        shenCirculation: liveData.shenCirculation, // Keep live SHEN circulation
         oraclePrice: liveData.oraclePrice + (scenario.ergPrice - liveData.oraclePrice) * interpolationFactor,
         reserveRatio: liveData.reserveRatio + (scenario.dsi - liveData.reserveRatio) * interpolationFactor,
         systemStatus: interpolationFactor > 0.5 ? scenario.status : liveData.systemStatus,
+        lastUpdated: new Date(), // Update timestamp for replay data
       };
     }
 
-    // No live data, return scenario data directly
+    // No live data, return scenario data directly with all required fields
     return {
       baseReserves: scenario.baseReserves,
       sigUsdCirculation: scenario.sigUsdCirculation,
+      shenCirculation: 50000, // Default SHEN circulation for scenarios
       oraclePrice: scenario.ergPrice,
       reserveRatio: scenario.dsi,
       systemStatus: scenario.status,
+      lastUpdated: new Date(),
     };
   }, [liveData, isReplayMode, replayScenario, replayTime]);
 }
