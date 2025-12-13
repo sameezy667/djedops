@@ -31,7 +31,7 @@ export function SystemStatus({ systemStatus }: SystemStatusProps) {
       aria-atomic="true"
     >
       <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-        <span className="text-white text-lg sm:text-2xl font-display font-bold">System Status:</span>
+        <span className="text-white text-base sm:text-2xl font-display font-bold">System Status:</span>
         <motion.span
           key={systemStatus}
           initial={{ opacity: 0 }}
@@ -47,7 +47,7 @@ export function SystemStatus({ systemStatus }: SystemStatusProps) {
               ease: "easeInOut"
             }
           }}
-          className={`text-2xl sm:text-3xl font-display font-black ${
+          className={`text-xl sm:text-3xl font-display font-black ${
             isNormal 
               ? 'text-[#39FF14] text-bloom-green' 
               : 'text-alert'
@@ -59,7 +59,7 @@ export function SystemStatus({ systemStatus }: SystemStatusProps) {
           {systemStatus}
         </motion.span>
       </div>
-      <div className="text-neutral-500 text-xs font-mono mt-1">
+      <div className="text-neutral-500 text-[10px] sm:text-xs font-mono mt-1">
         Peg Variance: <span className="text-[#E5E5E5]">0.00%</span>
       </div>
     </motion.div>
