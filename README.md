@@ -1,489 +1,538 @@
-# DjedOps Command Center
+<div align="center">
 
-## Project Description
-A real-time stability analytics dashboard for the Djed Protocol on the Ergo Blockchain. It provides deep insights into Reserve Ratios, Whale movements, and Arbitrage opportunities.
+# 🎯 DjedOPS Command Center
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-41%20Passing-success)](./lib/__tests__)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-### Core Monitoring
-- **Live DSI Monitor:** Real-time tracking of the Djed Stability Index with dynamic reserve ratio calculation
-- **Transaction Feed:** Live blockchain transaction monitoring for MINT/REDEEM operations (SigUSD & SigRSV)
-- **Oracle Consensus:** Real-time ERG/USD price from Ergo blockchain oracles
-- **Reactive 3D Visualization:** Dynamic Reserve Sun that transforms based on system health (SAFE/NORMAL/CRITICAL states)
+**Real-time stability analytics and risk management dashboard for the Djed Protocol on Ergo Blockchain**
 
-### Trading & Risk Management
-- **Arbitrage Sniper:** Live DEX price monitoring from Spectrum Finance with automated opportunity detection (±0.5% threshold)
-- **Sentinel Mode:** Automated guardian with configurable triggers for reserve ratio alerts, volatility warnings, and balance monitoring
-- **Risk Scenarios:** One-click stress tests (Flash Crash, Oracle Freeze, Bank Run) for protocol resilience testing
+[Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation) • [Contributing](#-contributing)
 
-### Wallet Integration
-- **Nautilus Wallet:** Full dApp connector integration with auto-reconnect and balance polling
-- **Real-Time Balance:** Live ERG balance display with 30-second refresh
+</div>
 
-### Mobile Experience
-- **React Native App:** Complete mobile companion app with Expo/EAS build support
-- **Responsive Design:** Mobile-first web dashboard with touch-optimized controls and adaptive layouts
+---
 
-## Project Maturity
-- [x] Prototype
-- [x] MVP
-- [x] Alpha
-- [ ] Beta
-- [ ] Production
-- [ ] Audited
+## 📋 Table of Contents
 
-## What's New
+- [Overview](#-overview)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Quick Start](#-quick-start)
+  - [Web Dashboard](#web-dashboard)
+  - [Mobile App](#mobile-app)
+  - [Demo Mode](#demo-mode)
+- [Testing](#-testing)
+- [Project Structure](#-project-structure)
+- [Design System](#-design-system)
+- [API Integration](#-api-integration)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+
+---
+
+## 🌟 Overview
+
+DjedOPS is a mission-critical monitoring platform providing operators and traders with real-time visibility into the Djed algorithmic stablecoin protocol on the Ergo blockchain. Built with a "Financial Brutalism" design philosophy, it combines live blockchain data, 3D visualizations, and automated risk management tools.
+
+### Project Maturity
+
+```
+✅ Prototype → ✅ MVP → ✅ Alpha → ⏳ Beta → 🎯 Production → 🔒 Audited
+```
+
+**Current Status:** Alpha (v0.1.0) - Production-ready features with 41 passing tests
+
+## ✨ Features
+
+### 📊 Core Monitoring
+- **Live DSI Monitor** - Real-time Djed Stability Index tracking with dynamic reserve ratio calculation
+- **Transaction Feed** - Live blockchain monitoring for MINT/REDEEM operations (SigUSD & SigRSV)
+- **Oracle Consensus** - Real-time ERG/USD price from Ergo blockchain oracles[^1]
+- **Reactive 3D Visualization** - Dynamic Reserve Sun that transforms based on system health
+
+### 💰 Trading & Risk Management
+- **Arbitrage Sniper** - Live DEX price monitoring from Spectrum Finance[^2] with automated opportunity detection (±0.5% threshold)
+- **Sentinel Mode** - Automated guardian with configurable triggers for reserve ratio alerts and volatility warnings
+- **Risk Scenarios** - One-click stress tests: Flash Crash, Oracle Freeze, Bank Run
+
+### 👛 Wallet Integration
+- **Nautilus Wallet** - Full dApp connector integration[^3] with auto-reconnect and balance polling
+- **Real-Time Balance** - Live ERG balance display with 30-second refresh
+
+### 📱 Cross-Platform
+- **React Native App** - Complete mobile companion app with Expo/EAS build support
+- **Responsive Design** - Mobile-first web dashboard with touch-optimized controls
 
 ### Latest Updates (December 2025)
-- ✅ **Live DEX Price Integration**: Real-time arbitrage monitoring from Spectrum Finance
-- ✅ **Live Transaction Feed**: Blockchain transaction monitoring with type detection
-- ✅ **Nautilus Wallet**: Full dApp connector integration with auto-reconnect
-- ✅ **Reactive Reserve Sun**: Three-state visualization (SAFE/NORMAL/CRITICAL)
-- ✅ **Performance Mode**: Optimized mode for low-end devices
-- ✅ **Sentinel Mode**: Automated monitoring with multi-channel alerts
-- ✅ **Risk Scenarios**: Flash Crash, Oracle Freeze, Bank Run stress tests
-- ✅ **Mobile App**: Complete React Native companion app
-- ✅ **Responsive Design**: Touch-optimized mobile-first layouts
-- ✅ **41 Tests**: Comprehensive test coverage with Jest + RTL
+```
+✅ Live DEX Price Integration    ✅ Nautilus Wallet Support
+✅ Transaction Feed              ✅ Reactive Reserve Sun  
+✅ Performance Mode              ✅ Sentinel Mode
+✅ Risk Scenarios                ✅ Mobile App
+✅ 41 Tests Passing              ✅ Responsive Design
+```
 
-## Tech Stack
-- **Frontend:** Next.js 14, Tailwind CSS, Framer Motion
-- **Visuals:** React Three Fiber (Three.js)
-- **Data:** Ergo Explorer API
+---
 
-## 🚀 Getting Started
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Frontend (Next.js 14)                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │   React     │  │   Zustand   │  │     SWR     │    │
+│  │ Components  │→→│    Store    │←←│  Data Hooks │    │
+│  └─────────────┘  └─────────────┘  └─────────────┘    │
+└────────────┬──────────────────────────────────┬─────────┘
+             │                                   │
+             ▼                                   ▼
+┌────────────────────────┐         ┌────────────────────────┐
+│   API Routes (Proxy)   │         │  3D Visualization      │
+│  • /api/djed           │         │  React Three Fiber     │
+│  • /api/dex            │         │  (WebGL)               │
+│  • /api/feed           │         └────────────────────────┘
+└────────────┬───────────┘
+             │
+    ┌────────┴────────┐
+    ▼                 ▼
+┌─────────────┐  ┌──────────────────┐
+│Ergo Explorer│  │Spectrum Finance  │
+│   API       │  │   DEX API        │
+└─────────────┘  └──────────────────┘
+```
+
+### Data Flow
+
+1. **External APIs** → Ergo Explorer, Spectrum Finance DEX
+2. **API Routes** → Next.js proxy endpoints (CORS handling, data transformation)
+3. **Custom Hooks** → SWR for caching + business logic (useDjedData, useDexPrice, useWallet)
+4. **Global State** → Zustand store (protocol data, wallet, sentinel config, simulations)
+5. **React Components** → 50+ components consuming state and rendering UI
+
+### Key Design Patterns
+
+- **Client-Side Rendering** - All data fetching client-side via SWR
+- **API Proxy Pattern** - Next.js API routes prevent CORS issues
+- **Optimistic Updates** - Immediate UI feedback with background revalidation
+- **Error Boundaries** - Graceful degradation with fallback UI
+- **Performance Mode** - Conditional rendering based on device capabilities
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| [Next.js](https://nextjs.org/) | 14.2.33 | React framework with App Router |
+| [TypeScript](https://www.typescriptlang.org/) | 5.0 | Type-safe development |
+| [React](https://react.dev/) | 18.2 | UI library |
+| [Tailwind CSS](https://tailwindcss.com/) | 3.4.1 | Utility-first styling |
+| [Framer Motion](https://www.framer.com/motion/) | 12.23.25 | Advanced animations |
+| [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) | 8.15.0 | 3D graphics (WebGL) |
+
+### State & Data
+| Technology | Purpose |
+|-----------|---------|
+| [Zustand](https://github.com/pmndrs/zustand) | Lightweight state management |
+| [SWR](https://swr.vercel.app/) | Data fetching & caching |
+
+### Testing
+| Technology | Purpose |
+|-----------|---------|
+| [Jest](https://jestjs.io/) | Unit testing framework |
+| [Testing Library](https://testing-library.com/) | Component testing |
+| [fast-check](https://github.com/dubzzz/fast-check) | Property-based testing |
+
+### Mobile
+| Technology | Purpose |
+|-----------|---------|
+| [React Native](https://reactnative.dev/) | Native mobile framework |
+| [Expo](https://expo.dev/) | Development & build platform |
+| [Reanimated](https://docs.swmansion.com/react-native-reanimated/) | Native animations |
+
+### APIs & Blockchain
+- **[Ergo Explorer API](https://api.ergoplatform.com/api/v1/docs/)** - Blockchain data & oracle prices
+- **[Spectrum Finance API](https://api.spectrum.fi/)** - DEX pool data & liquidity
+- **[Nautilus Wallet](https://github.com/capt-nemo429/nautilus-wallet)** - Ergo dApp connector
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+```bash
+Node.js 18+ or 20+
+npm 9+ or yarn
+Git
+```
 
 ### Web Dashboard
-```bash
-# Clone the repo
-git clone <repository-url>
 
-# Install dependencies
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/djedops.git
+cd djedops
+
+# 2. Install dependencies
 npm install
 
-# Run development server
+# 3. Start development server
 npm run dev
 
-# Open http://localhost:3000
-```
-
-### Mobile App
-```bash
-# Navigate to mobile directory
-cd mobile
-
-# Install dependencies
-npm install
-
-# Start Expo development server
-npm start
-
-# Run on iOS simulator
-npm run ios
-
-# Run on Android emulator
-npm run android
-
-# Build for production
-npm run build:android  # or build:ios
-```
-
-### Demo Mode
-For environments without external API access:
-```
-http://localhost:3000?demo=true
-```
-
-## 🧪 Testing
-
-### Run All Tests
-```bash
-npm test                    # Run all tests
-npm test -- --watch        # Watch mode
-npm test -- --coverage     # With coverage report
-```
-
-### Test Suites
-- **Unit Tests**: Calculation functions with edge cases (calculations.test.ts)
-- **Component Tests**: React component rendering (TerminalFeed.test.ts)
-- **Integration Tests**: Wallet and simulation behavior
-- **Property-Based Tests**: Using fast-check for exhaustive coverage
-
-**Status**: All 41 tests passing ✅
-
-## 📚 Documentation
-
-- **[NEW_FEATURES_TESTING.md](./NEW_FEATURES_TESTING.md)** - Complete guide for testing new features
-- **[LIVE_DEX_PRICE.md](./LIVE_DEX_PRICE.md)** - DEX integration documentation
-- **[LIVE_TRANSACTION_FEED.md](./LIVE_TRANSACTION_FEED.md)** - Transaction monitoring implementation
-- **[WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)** - Nautilus wallet integration guide
-- **[REACTIVE_RESERVE_SUN.md](./REACTIVE_RESERVE_SUN.md)** - Reserve Sun visualization details
-- **[PERFORMANCE_MODE.md](./PERFORMANCE_MODE.md)** - Performance optimization guide
-- **[MOBILE_APP_SUMMARY.md](./MOBILE_APP_SUMMARY.md)** - Mobile app documentation
-- **[CODE_QUALITY.md](./CODE_QUALITY.md)** - Architecture and code standards
-- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Complete implementation details
-
-## License
-GPL v3 - See LICENSE.md
-
-## Copyright
-© 2025 The Stable Order
-
-Run tests in watch mode:
-
-```bash
-npm test -- --watch
+# 4. Open browser
+# Navigate to http://localhost:3000
 ```
 
 ### Production Build
 
 ```bash
+# Build for production
 npm run build
+
+# Start production server
 npm start
 ```
 
-## 📊 Features
+### Mobile App
 
-### Real-Time Monitoring
-- **Reserve Ratio Display**: Live calculation of `(Base Reserves × ERG Price) / (SigUSD Supply × 100)` with detailed console logging
-- **System Status**: Dynamic visual indicator with three states (SAFE ≥800% | NORMAL 400-800% | CRITICAL <400%)
-- **Price Oracle**: Current ERG/USD price from Ergo Explorer API with 15-second polling
-- **Transaction Feed**: Live blockchain transaction monitoring with type detection (MINT_DJED, REDEEM_DJED, MINT_SHEN, REDEEM_SHEN)
-- **API Health**: Status indicators with error banners and automatic retry
-- **Page Visibility API**: Pauses polling when tab is inactive to conserve resources
+```bash
+# 1. Navigate to mobile directory
+cd mobile
 
-### 🎯 Arbitrage Sniper (Market Opportunity Detection)
-Automated detection of arbitrage opportunities between protocol and DEX prices:
+# 2. Install dependencies
+npm install
 
-- **Live DEX Integration**: Real-time price data from Spectrum Finance (Ergo's main DEX)
-- **Smart Signals**:
-  - 🟢 **MINT DJED**: DEX price >0.5% above protocol (buy ERG, mint DJED, sell on DEX)
-  - 🔴 **REDEEM DJED**: DEX price >0.5% below protocol (buy DJED on DEX, redeem for ERG)
-  - ⚪ **NO CLEAR EDGE**: Spread within threshold
-- **Visual Feedback**: Pulsing glow effects on profitable opportunities
-- **Spread Calculation**: Live display of absolute and percentage differences
-- **15-Second Polling**: Automatic refresh for real-time opportunity detection
-- **Liquidity Display**: Shows TVL and data source for transparency
+# 3. Start Expo development server
+npm start
 
-### 🛡️ Sentinel Mode (Peg Protection Bot)
-Automated guardian that monitors critical conditions and triggers emergency protocols:
+# 4. Run on specific platform
+npm run ios       # iOS simulator (Mac only)
+npm run android   # Android emulator
+npm run web       # Web browser
 
-- **Configurable Triggers**:
-  - Auto-redeem when reserve ratio < 400%
-  - Volatility alerts on rapid price movements (±5% threshold)
-  - Custom balance monitoring
-  - Wallet disconnection alerts
-- **Multi-Channel Notifications**:
-  - Prominent in-app banner with pulsing alert
-  - Browser notifications (if permitted)
-  - Terminal feed event logging with timestamps
-  - Border flash visual effect
-  - Sound alerts (optional)
-- **Visual Indicators**: 
-  - Pulsing green shield icon when armed
-  - Red alert mode during trigger events
-  - Modal configuration panel with real-time status
-- **Persistence**: Settings saved to localStorage with auto-restore
-- **Simulation Mode**: All actions are front-end only (no real transactions)
+# 5. Build for production (requires EAS CLI)
+npm install -g eas-cli
+eas login
+npm run build:android  # or build:ios
+```
 
-### 💥 Risk Scenarios (Preset Stress Tests)
-One-click stress test scenarios for realistic failure mode testing:
+### Demo Mode
 
-- **FLASH CRASH**: Instant 50% price drop simulation
-  - Tests protocol behavior during extreme market crashes
-  - Immediate ratio recalculation
-  - Reserve Sun transforms to critical state
-  
-- **ORACLE FREEZE**: Simulate oracle feed failure
-  - Locks price at current value
-  - Disables manual slider
-  - Warning banner: "ORACLE FEED UNRESPONSIVE"
-  - Tests system resilience without price updates
-  
-- **BANK RUN**: Force reserve ratio below 400%
-  - Instant CRITICAL state trigger
-  - Full theme switch to red alert mode
-  - Triggers Sentinel (if armed)
-  - Tests emergency protocols and user response
-  - Reserve Sun transforms to "spiky ball of death"
+For testing without external API access:
 
-- **Reset to Live**: One-click return to normal state with smooth transitions
-- **Terminal Logging**: All scenarios logged with timestamps and details
-- **Visual Feedback**: Scenario badges and active state indicators
+```
+http://localhost:3000?demo=true
+```
 
-### Interactive Price Simulation (Enhanced)
-Click **"LAUNCH SIMULATION"** to access enhanced simulation tools:
+Uses static mock data from `public/mock-data.json`
 
-1. **Manual Slider**: Adjust ERG price ($0.10 - $10.00)
-2. **Risk Scenarios**: Three preset stress tests (see above)
-3. **Real-Time Calculation**: See how different prices affect the reserve ratio
-4. **Visual Feedback**: Watch the system status change between NORMAL (green) and CRITICAL (red)
-5. **Keyboard Controls**: Use arrow keys to fine-tune the slider
-6. **Mode Indicators**: Clear labeling of active scenarios
+---
 
-**Formula Verification:**
-- Open browser console to see detailed calculation logs
-- Format: `(baseReserves * price) / (sigUsdSupply * 100)`
-- All intermediate values are displayed for transparency
+## 🧪 Testing
 
-### 🎨 Reactive Reserve Sun Visualization
-Dynamic 3D visualization that transforms based on protocol health:
+### Run Tests
 
-- **🔵 SAFE State (>800%)**: Cyan sphere with slow rotation, no pulse - over-collateralized
-- **🟢 NORMAL State (400-800%)**: Matrix green sphere with gentle breathing - adequately collateralized
-- **🔴 CRITICAL State (<400%)**: Red "spiky ball of death" with fast erratic rotation and aggressive pulse - under-collateralized
-- **Real-Time Transformation**: Instantly responds to reserve ratio changes
-- **Performance Mode**: Toggle between full visual quality and optimized mode (50% fewer rings/lines, 2x slower rotation)
-- **Page Visibility Integration**: Pauses animations when tab is inactive
+```bash
+# Run all tests
+npm test
 
-### 💼 Wallet Integration
-Complete Nautilus wallet integration using Ergo dApp Connector standard:
+# Watch mode
+npm test -- --watch
 
-- **One-Click Connect**: Seamless wallet connection with read access request
-- **Auto-Reconnect**: Persists connection in localStorage across sessions
-- **Live Balance**: ERG balance with 30-second refresh polling
-- **Address Display**: Shortened wallet address with full copy functionality
-- **Disconnect**: Clean wallet disconnection with state reset
-- **Error Handling**: Graceful fallback for missing Nautilus extension
-- **Sentinel Integration**: Wallet balance monitoring for low balance alerts
+# Coverage report
+npm test -- --coverage
+```
 
-### ⚡ Performance Mode
-Optimized experience for low-end devices and battery conservation:
+### Test Coverage
 
-- **Toggle Control**: Easy switch between Visual and Performance modes
-- **Reserve Sun Optimization**:
-  - 50% fewer outer rings (4 → 2)
-  - 50% fewer grid lines (8 → 4)
-  - 2x slower rotation speed
-  - Disabled glow effects
-  - Reduced pulse animations
-- **LocalStorage Persistence**: Remembers user preference
-- **Visual Indicator**: ⚡ Performance / ✨ Visual mode icons
+| Test Suite | Tests | Status | Coverage |
+|-----------|-------|--------|----------|
+| `calculations.test.ts` | 12 | ✅ | Unit tests for DSI & reserve ratio |
+| `simulation.test.ts` | 15 | ✅ | Scenario & price simulation logic |
+| `wallet.test.ts` | 8 | ✅ | Nautilus wallet integration |
+| `TerminalFeed.test.ts` | 6 | ✅ | Transaction feed component |
+| **Total** | **41** | **✅** | **Comprehensive coverage** |
 
-### 📱 Mobile App
-Full-featured React Native mobile app built with Expo:
+### Testing Approach
 
-- **Native Features**:
-  - Home screen with Reserve Sun visualization
-  - Diagnostics screen with algorithmic logic display
-  - Live transaction feed with color-coded events
-  - Statistics cards with animated progress bars
-  - Oracle status indicator (6/6 active oracles)
-- **Navigation**: Expo Router with tab-based navigation
-- **State Management**: Zustand for global state
-- **Animations**: React Native Reanimated for smooth 60fps animations
-- **Build Support**: EAS Build configuration for iOS and Android
-- **Platform**: Supports iOS, Android, and Web via Expo
+- **Unit Tests** - Pure functions, calculations, utilities
+- **Component Tests** - React component rendering & interactions
+- **Integration Tests** - Multi-component workflows
+- **Property-Based Tests** - Using fast-check for edge cases
 
-### Responsive Design
-- **Mobile-First**: Touch-optimized controls with 44px minimum touch targets
-- **Breakpoints**: sm (640px), md (768px), lg (1024px), xl (1280px)
-- **Adaptive Layouts**: DataGrid adjusts from 1 → 2 → 3 columns across breakpoints
-- **Touch Optimizations**: Larger slider thumbs (28px), active:scale feedback
-- **Accessibility**: WCAG AA compliant, keyboard navigation, ARIA labels, reduced motion support
+**Status**: All 41 tests passing ✅
 
-## 🎨 Design System
+For detailed testing guide, see [NEW_FEATURES_TESTING.md](./NEW_FEATURES_TESTING.md)
 
-### Financial Brutalism Philosophy
-High contrast, monospace data, terminal-inspired aesthetics with zero fluff.
-
-#### Colors
-- **Deep Void Black** (`#050505`) - Background
-- **Obsidian** (`#080808`) - Surface
-- **Neon Terminal Green** (`#39FF14`) - Primary/NORMAL state
-- **Alert Red** (`#FF2A2A`) - CRITICAL state
-- **Off-white** (`#E5E5E5`) - Primary text
-- **Steel Grey** (`#888888`) - Secondary text
-
-#### Typography
-- **Display**: Unbounded, Inter (weights: 700, 900)
-- **Monospace**: JetBrains Mono, Space Mono
-
-#### Visual Effects
-- CRT scanline overlay
-- Hollow text effect (stroke with transparent fill)
-- Green/Red glow text shadows
-- Corner L-bracket decorations
-- Backdrop blur on modals
-
-### 🔄 Live API Integrations
-Real-time data from multiple sources:
-
-- **Ergo Explorer API**: 
-  - Oracle price data (`/api/v1/oracle/poolBox`)
-  - Protocol reserves and metrics
-  - SigmaUSD contract transactions
-  - 15-second cache revalidation
-  
-- **Spectrum Finance DEX**:
-  - Live SigUSD/ERG pool data
-  - Liquidity metrics and TVL
-  - Real-time arbitrage spread calculation
-  
-- **Transaction Monitoring**:
-  - Live blockchain transaction feed
-  - Type detection (MINT/REDEEM for SigUSD and SigRSV)
-  - Token amount calculation with proper decimal handling
-  - Filters last 20 transactions, returns top 10 relevant ones
-
-## 🏗️ Tech Stack
-
-- **Framework**: Next.js 14.2.33 with App Router
-- **Mobile**: React Native with Expo SDK 52
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 3.4.1
-- **Animations**: Framer Motion 12.23.25
-- **State Management**: Zustand 5.0.9
-- **Data Fetching**: SWR 2.3.7 with 10s refresh
-- **Testing**: Jest + React Testing Library (41 tests passing)
+---
 
 ## 📁 Project Structure
 
 ```
-├── app/
-│   ├── layout.tsx          # Root layout with fonts, metadata, error boundary
-│   ├── page.tsx            # Main dashboard page with demo mode toggle
-│   ├── globals.css         # Global styles and design system variables
-│   └── api/
-│       └── djed/
-│           └── route.ts    # CORS proxy for Ergo Explorer API
-├── components/
-│   ├── HeroSection.tsx              # Main dashboard section
-│   ├── SimulationModal.tsx          # Interactive price simulation with scenarios
-│   ├── ScenarioControls.tsx         # Risk scenario preset buttons (NEW)
-│   ├── MarketOpportunityCard.tsx    # Arbitrage signal display (NEW)
-│   ├── SentinelPanel.tsx            # Sentinel config & toggle UI (NEW)
-│   ├── SentinelTrigger.tsx          # Trigger notifications & effects (NEW)
-│   ├── SystemStatus.tsx             # NORMAL/CRITICAL status display
-│   ├── TerminalFeed.tsx             # Transaction event log
-│   ├── WalletBalance.tsx            # ERG balance display
-│   ├── WalletConnect.tsx            # Wallet connection button
-│   ├── ErrorBanner.tsx              # Error/warning display
-│   ├── ErrorBoundary.tsx            # Global error catching
-│   └── isolated/
-│       ├── ReserveSun.tsx           # Health visualization (CSS-based)
-│       └── DataGrid.tsx             # Data display grid
-├── lib/
-│   ├── calculations.ts              # Reserve ratio formulas with logging
-│   ├── demo-service.ts              # Mock data management
-│   ├── store.ts                     # Zustand state (+ sentinel, scenarios)
-│   ├── types.ts                     # TypeScript interfaces (extended)
-│   └── hooks/
-│       ├── useDjedData.ts           # Data fetching hook
-│       ├── useDexPrice.ts           # DEX price & arbitrage calc (NEW)
-│       ├── usePageVisibility.ts     # Visibility detection
-│       └── usePrefersReducedMotion.ts  # Motion preference
-├── public/
-│   └── mock-data.json      # Demo mode data
-├── tailwind.config.ts      # Tailwind + Financial Brutalism theme
-└── jest.config.js          # Testing configuration
+djedops/
+├── app/                          # Next.js App Router
+│   ├── layout.tsx               # Root layout with fonts & error boundary
+│   ├── page.tsx                 # Main dashboard
+│   ├── globals.css              # Financial Brutalism theme
+│   └── api/                     # API routes (CORS proxy)
+│       ├── djed/route.ts       # Ergo Explorer proxy
+│       ├── dex/route.ts        # Spectrum Finance proxy
+│       └── feed/route.ts       # Transaction feed proxy
+├── components/                   # React components (50+)
+│   ├── HeroSection.tsx          # Main dashboard section
+│   ├── ReserveSunWithVisibility.tsx  # 3D visualization wrapper
+│   ├── MarketOpportunityCard.tsx     # Arbitrage signals
+│   ├── SentinelPanel.tsx        # Automated monitoring
+│   ├── TerminalFeed.tsx         # Transaction log
+│   ├── WalletConnect.tsx        # Nautilus integration
+│   ├── ErrorBoundary.tsx        # Global error handling
+│   └── isolated/                # Reusable components
+│       ├── ReserveSun.tsx       # 3D sphere visualization
+│       └── DataGrid.tsx         # Metrics display
+├── lib/                         # Business logic & utilities
+│   ├── calculations.ts          # DSI & reserve ratio formulas
+│   ├── store.ts                 # Zustand global state
+│   ├── types.ts                 # TypeScript interfaces
+│   ├── constants.ts             # Configuration constants
+│   ├── demo-service.ts          # Mock data service
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useDjedData.ts      # Protocol data fetching
+│   │   ├── useDexPrice.ts      # DEX price & arbitrage
+│   │   ├── useTransactionFeed.ts # Blockchain transactions
+│   │   ├── useWallet.ts        # Nautilus wallet logic
+│   │   └── usePageVisibility.ts # Tab visibility detection
+│   ├── utils/
+│   │   └── dsiCalculator.ts    # DSI calculation logic
+│   └── __tests__/               # Unit tests
+│       ├── calculations.test.ts
+│       ├── simulation.test.ts
+│       └── wallet.test.ts
+├── mobile/                       # React Native app
+│   ├── app/                     # Expo Router
+│   ├── components/              # Mobile components
+│   ├── utils/                   # Mobile utilities
+│   └── package.json             # Mobile dependencies
+├── public/                      # Static assets
+│   ├── mock-data.json          # Demo mode data
+│   └── manifest.json           # PWA manifest
+├── stories/                     # Storybook stories
+├── tailwind.config.ts          # Tailwind + theme config
+├── jest.config.js              # Jest configuration
+└── package.json                # Dependencies & scripts
 ```
 
-## 🧪 Testing
+---
 
-All 41 tests passing:
-- **Unit Tests**: Calculation functions with edge cases
-- **Component Tests**: React component rendering and interactions
-- **Integration Tests**: Simulation modal behavior
-- **Property-Based Tests**: Using fast-check for exhaustive coverage
+## 🎨 Design System
 
-## 🔧 Development Notes
+### Financial Brutalism Philosophy
 
-### API Integration
-- **Live Mode**: Fetches from Ergo Explorer API via `/api/djed` proxy
-- **Demo Mode**: Uses `public/mock-data.json` when `?demo=true`
-- **CORS Handling**: Next.js API route proxies external requests
-- **Error Handling**: Graceful fallback to demo data on API failures
+High-contrast, terminal-inspired aesthetics with zero fluff. Designed for rapid data interpretation in high-stress trading scenarios.
 
-### Performance Optimizations
-- Code splitting with dynamic imports
-- SWR deduplication (5s interval)
-- Image optimization
-- Bundle size monitoring
+#### Color Palette
 
-### Accessibility
-- Keyboard navigation with visible focus indicators
-- ARIA live regions for dynamic content
-- Skip navigation link
-- Reduced motion support
-- Color contrast WCAG AA compliant
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Deep Void Black | `#050505` | Background |
+| Obsidian | `#080808` | Surface |
+| Terminal Green | `#39FF14` | SAFE/NORMAL state, primary actions |
+| Alert Red | `#FF2A2A` | CRITICAL state, warnings |
+| Off-white | `#E5E5E5` | Primary text |
+| Steel Grey | `#888888` | Secondary text |
 
-## 🧪 Testing & Documentation
+#### Typography
 
-### Run All Tests
-```bash
-npm test
-```
-All 41 tests passing ✅
+- **Display**: Unbounded (700, 900) - Headers and emphasis
+- **Body**: Inter (400, 700, 900) - General text
+- **Monospace**: JetBrains Mono, Space Mono - All numeric data
 
-### New Features Testing Guide
-See **[NEW_FEATURES_TESTING.md](./NEW_FEATURES_TESTING.md)** for comprehensive testing guide including:
-- Arbitrage Sniper usage and testing
-- Sentinel Mode configuration and triggers
-- Risk Scenarios step-by-step testing
-- Integration test flows
-- Common issues and fixes
-- Demo scripts for presentations
+#### Visual Effects
 
-### Quick Feature Reference
+- ✨ CRT scanline overlay (nostalgic terminal aesthetic)
+- 💚 Green glow on positive signals (`text-shadow: 0 0 10px rgba(57, 255, 20, 0.6)`)
+- ❤️ Red glow on alerts (`text-shadow: 0 0 10px rgba(255, 42, 42, 0.6)`)
+- 📐 Corner L-brackets on all containers (brutalist decoration)
+- 🔲 Hollow text effect (stroke with transparent fill)
 
-#### Arbitrage Sniper
-- **Location**: Below HeroSection, titled "Arbitrage Monitor"
-- **Signals**: MINT DJED (green) | REDEEM DJED (red) | NO CLEAR EDGE (gray)
-- **Threshold**: ±0.5% spread between DEX and protocol price
-- **Refresh**: Every 15 seconds
+#### Accessibility
 
-#### Sentinel Mode
-- **Activation**: Click "SENTINEL MODE" button (top-right)
-- **Config Options**: Auto-redeem, volatility alerts, balance tracking
-- **Visual Indicators**: Pulsing green shield when armed
-- **Trigger Conditions**: Reserve ratio < 400% (if enabled)
-- **Notifications**: Banner, border flash, terminal log, browser notification
+- ✅ WCAG AA compliant (4.5:1 text contrast)
+- ✅ Keyboard navigation with visible focus indicators
+- ✅ `prefers-reduced-motion` support
+- ✅ ARIA labels and live regions
+- ✅ Semantic HTML structure
 
-#### Risk Scenarios
-- **Access**: Inside "LAUNCH SIMULATION" modal
-- **FLASH CRASH**: -50% price, instant
-- **ORACLE FREEZE**: Lock price, disable slider
-- **BANK RUN**: Force ratio to 399%, trigger CRITICAL
-- **Reset**: "RESET TO LIVE" button in scenario controls
+---
 
-## 🚀 Production Deployment
+## 🔌 API Integration
 
-### Environment Variables
-No environment variables required. All configuration is compile-time.
+### Ergo Explorer API
 
-### Build Command
-```bash
-npm run build
+**Base URL**: `https://api.ergoplatform.com/api/v1`
+
+```typescript
+// Oracle price data
+GET /oracle/poolBox
+Response: { price: number, datapoints: OracleData[] }
+
+// Protocol metrics
+GET /addresses/{address}/balance/total
+Response: { nanoErgs: number }
 ```
 
-### Output
-Static export suitable for CDN deployment or Docker containerization.
+**Polling**: 15 seconds  
+**Cache**: SWR with 10s revalidation  
+**Error Handling**: Exponential backoff, fallback to demo data
 
-### Demo Mode for Judging
-For environments without external API access:
+### Spectrum Finance API
+
+**Base URL**: `https://api.spectrum.fi/v1`
+
+```typescript
+// DEX pool data
+GET /amm/pools
+Response: SpectrumPool[]
+
+// Price calculation
+price = (reserveY / 10^decimalsY) / (reserveX / 10^decimalsX)
 ```
-https://your-domain.com?demo=true
+
+**Polling**: 15 seconds  
+**Arbitrage Detection**: ±0.5% spread threshold
+
+### Nautilus Wallet Integration
+
+**dApp Connector**: EIP-0012 standard[^3]
+
+```typescript
+// Connection flow
+ergo.request({ method: "wallet_connect" })
+→ User approves in Nautilus
+→ ergo.get_balance() for ERG balance
+→ localStorage persistence for auto-reconnect
 ```
 
-## 📝 License
+**Balance Polling**: 30 seconds  
+**Reconnection**: Automatic on page load
 
-MIT License - See LICENSE file for details
+---
+
+## 📚 Documentation
+
+### Core Documentation
+- **[SETUP.md](./SETUP.md)** - Development environment setup
+- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Complete implementation details
+- **[CODE_QUALITY.md](./CODE_QUALITY.md)** - Architecture & code standards
+
+### Feature Guides
+- **[NEW_FEATURES_TESTING.md](./NEW_FEATURES_TESTING.md)** - Testing guide for all features
+- **[LIVE_DEX_PRICE.md](./LIVE_DEX_PRICE.md)** - DEX integration technical docs
+- **[LIVE_TRANSACTION_FEED.md](./LIVE_TRANSACTION_FEED.md)** - Transaction monitoring implementation
+- **[WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)** - Nautilus wallet integration
+- **[REACTIVE_RESERVE_SUN.md](./REACTIVE_RESERVE_SUN.md)** - 3D visualization details
+- **[PERFORMANCE_MODE.md](./PERFORMANCE_MODE.md)** - Performance optimization guide
+- **[MOBILE_APP_SUMMARY.md](./MOBILE_APP_SUMMARY.md)** - Mobile app documentation
+
+---
 
 ## 🤝 Contributing
 
-This project follows strict Financial Brutalism design principles. All contributions should maintain:
-- High contrast (3:1 minimum)
-- Monospace fonts for data
-- Terminal green (#39FF14) and alert red (#FF2A2A) color scheme
-- Zero gradients, shadows only for functional glow effects
-- Brutalist corner brackets on all containers
+We welcome contributions! Please follow these guidelines:
 
-## 📚 Additional Documentation
+### Development Workflow
 
-- **[NEW_FEATURES_TESTING.md](./NEW_FEATURES_TESTING.md)** - Complete guide for new features
-- **[SETUP.md](./SETUP.md)** - Development environment setup
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Make changes following our code style
+4. Write/update tests
+5. Run test suite: `npm test`
+6. Commit: `git commit -m 'Add amazing feature'`
+7. Push: `git push origin feature/amazing-feature`
+8. Open Pull Request
 
-## License
+### Code Style
 
-MIT
+- **TypeScript**: Strict mode enabled
+- **Components**: Functional components with hooks
+- **Styling**: Tailwind utility classes (no CSS modules)
+- **Testing**: Jest + Testing Library
+- **Commits**: Conventional Commits format
+
+### Design Principles
+
+All contributions must maintain Financial Brutalism aesthetic:
+- ✅ High contrast (3:1 minimum)
+- ✅ Monospace fonts for all numeric data
+- ✅ Terminal green (#39FF14) and alert red (#FF2A2A)
+- ❌ No gradients
+- ❌ No rounded corners (except functional elements)
+- ❌ No decorative shadows (only functional glows)
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2025 The Stable Order
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```
+
+---
+
+## 🙏 Acknowledgments
+
+### Core Technologies
+- [Next.js Team](https://nextjs.org/) - React framework
+- [Vercel](https://vercel.com/) - Deployment platform
+- [Pmndrs](https://github.com/pmndrs) - React Three Fiber & Zustand
+
+### Ergo Ecosystem
+- **[Ergo Platform](https://ergoplatform.org/)** - Blockchain infrastructure
+- **[Djed Protocol](https://djed.io/)** - Algorithmic stablecoin design[^4]
+- **[Spectrum Finance](https://spectrum.fi/)** - Decentralized exchange on Ergo[^2]
+- **[Nautilus Wallet](https://github.com/capt-nemo429/nautilus-wallet)** - Ergo wallet with dApp connector[^3]
+
+### Resources & Documentation
+- **Ergo Explorer API** - Blockchain data provider
+- **Ergo Oracle Pools** - Decentralized price feeds[^1]
+- **Financial Brutalism** - Design philosophy inspiration
+
+### Contributors
+Built with AI-assisted development tools while maintaining human-driven architecture and design decisions.
+
+---
+
+## 📖 References
+
+[^1]: [Ergo Oracle Pools Documentation](https://docs.ergoplatform.com/dev/data-model/oracle/) - Decentralized oracle design
+[^2]: [Spectrum Finance Documentation](https://docs.spectrum.fi/) - AMM protocol on Ergo
+[^3]: [EIP-0012: dApp Connector Standard](https://github.com/ergoplatform/eips/blob/master/eip-0012.md) - Wallet integration standard
+[^4]: [Djed: A Formally Verified Crypto-Backed Stablecoin](https://eprint.iacr.org/2021/1069.pdf) - Academic whitepaper
+
+---
+
+<div align="center">
+
+**Built with ❤️ for the Ergo community**
+
+[Report Bug](https://github.com/yourusername/djedops/issues) • [Request Feature](https://github.com/yourusername/djedops/issues) • [Documentation](./IMPLEMENTATION_SUMMARY.md)
+
+</div>
