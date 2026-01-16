@@ -46,32 +46,35 @@ export function generateCLIDeploymentCommand(
   const jsonContent = JSON.stringify(workflowData, null, 2);
   const jsonFileName = `workflow-${input.workflow_id.slice(0, 8)}.json`;
 
-  // Generate CLI command
-  const command = `weil contract call ${config.coordinatorContractAddress} \\
+  // Generate CLI command for widl-cli (installed in WSL)
+  const command = `wsl /usr/local/bin/widl-cli deploy \\
+  --contract ${config.coordinatorContractAddress} \\
   --method ${config.deployMethod} \\
-  --args-file ${jsonFileName} \\
-  --from ${input.owner} \\
-  --network weilliptic-testnet \\
-  --rpc https://sentinel.unweil.me`;
+  --args-file /mnt/c/Users/$USER/Downloads/${jsonFileName}`;
 
   const setupSteps = [
-    '1. Install Weil CLI (if not installed):',
-    '   npm install -g @weilliptic/weil-cli',
-    '   # or download from https://docs.weilliptic.ai/docs',
+    '1. Install Weil CLI in WSL (if not installed):',
+    '   # In PowerShell:',
+    '   wsl --install',
+    '   # Restart your computer, then in WSL:',
+    '   sudo install -m 0755 /path/to/widl /usr/local/bin/widl',
+    '   sudo install -m 0755 /path/to/cli /usr/local/bin/widl-cli',
     '',
-    '2. Configure your network:',
-    '   weil config set rpc-url https://sentinel.unweil.me',
-    '   weil config set network weilliptic-testnet',
+    '2. Set up wallet environment variables in WSL:',
+    '   export WC_PRIVATE_KEY=$HOME/.weilliptic',
+    '   export WC_PATH=$HOME/.weilliptic',
+    '   echo "export WC_PRIVATE_KEY=$HOME/.weilliptic" >> ~/.bashrc',
+    '   echo "export WC_PATH=$HOME/.weilliptic" >> ~/.bashrc',
     '',
-    '3. Import your account (use WAuth private key/mnemonic):',
-    `   weil account import --name my-account`,
-    '   # Enter your private key or mnemonic when prompted',
+    '3. Configure your wallet (if not already done):',
+    `   widl-cli wallet setup --generate_mnemonic`,
+    '   # Save the mnemonic shown - you need it to recover your wallet',
     '',
-    `4. Save the workflow data to ${jsonFileName}:`,
-    '   # Copy the JSON content below and save it',
+    `4. Download ${jsonFileName} to your Downloads folder`,
+    '   # Click the Download JSON button below',
     '',
-    '5. Run the deployment command:',
-    '   # Copy and paste the command below',
+    '5. Deploy the workflow from WSL:',
+    '   # Copy and paste the command below into WSL terminal',
   ];
 
   return {

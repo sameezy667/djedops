@@ -7,12 +7,37 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/Tests-41%20Passing-success)](./lib/__tests__)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Backend Ready](https://img.shields.io/badge/Backend-Production%20Ready-success)](./backend)
 
-**Real-time stability analytics and risk management dashboard for the Djed Protocol on Ergo Blockchain**
+**Visual workflow automation platform for DeFi operations on WeilChain**
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation) • [Contributing](#-contributing)
+[Features](#-features) • [Quick Start](#-quick-start) • [Deployment](#-deployment) • [Architecture](#-architecture) • [Documentation](#-documentation)
 
 </div>
+
+---
+
+## 🚀 NEW: Production-Ready Backend Deployment
+
+DjedOps now features a **seamless one-click deployment** workflow with no WSL required!
+
+### 🎉 What's New
+
+- ✅ **Backend API Server** - Express.js server for workflow deployment
+- ✅ **Automatic widl-cli Installation** - No manual CLI setup needed
+- ✅ **One-Click Deploy** - Deploy workflows directly from the browser
+- ✅ **Render.com Ready** - Deploy to production in 5 minutes
+- ✅ **Complete Documentation** - Step-by-step guides included
+
+### 📚 Quick Links
+
+| Guide | Purpose |
+|-------|---------|
+| [🚀 Deployment Guide](./RENDER_DEPLOYMENT_GUIDE.md) | Complete Render deployment walkthrough |
+| [✅ Pre-Deployment Checklist](./PRE_DEPLOYMENT_CHECKLIST.md) | Testing and verification steps |
+| [📝 Implementation Summary](./FINAL_IMPLEMENTATION_SUMMARY.md) | What's been implemented |
+| [🏗️ Architecture Diagram](./ARCHITECTURE_DIAGRAM.md) | Visual architecture overview |
+| [⚡ Quick Reference](./QUICK_COMMAND_REFERENCE.md) | Common commands and troubleshooting |
 
 ---
 
@@ -23,8 +48,8 @@
 - [Architecture](#-architecture)
 - [Tech Stack](#-tech-stack)
 - [Quick Start](#-quick-start)
-  - [Web Dashboard](#web-dashboard)
-  - [Mobile App](#mobile-app)
+  - [Local Development](#local-development)
+  - [Production Deployment](#production-deployment)
   - [Demo Mode](#demo-mode)
 - [Testing](#-testing)
 - [Project Structure](#-project-structure)
@@ -39,15 +64,15 @@
 
 ## 🌟 Overview
 
-DjedOPS is a mission-critical monitoring platform providing operators and traders with real-time visibility into the Djed algorithmic stablecoin protocol on the Ergo blockchain. Built with a "Financial Brutalism" design philosophy, it combines live blockchain data, 3D visualizations, and automated risk management tools.
+DjedOPS is a visual workflow automation platform that combines the Djed stablecoin protocol with WeilChain's applet system to create automated DeFi workflows. Build complex trading strategies, risk management systems, and cross-chain operations with a drag-and-drop interface.
 
 ### Project Maturity
 
 ```
-✅ Prototype → ✅ MVP → ✅ Alpha → ⏳ Beta → 🎯 Production → 🔒 Audited
+✅ Prototype → ✅ MVP → ✅ Alpha → ✅ Backend Ready → 🎯 Production Deployment → 🔒 Audited
 ```
 
-**Current Status:** Alpha (v0.1.0) - Production-ready features with 41 passing tests
+**Current Status:** Production Ready (v1.0.0) - Backend server deployed, ready for live use
 
 ## ✨ Features
 

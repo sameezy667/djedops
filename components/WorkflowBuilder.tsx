@@ -487,22 +487,59 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         deployed_at: Math.floor(Date.now() / 1000),
       };
       
-      // Generate CLI deployment command instead of browser transaction
-      console.log('[Deploy] Generating CLI command for deployment...');
+      // STEP 6: Deploy workflow via backend API
+      console.log('[Deploy] Deploying workflow via backend API...');
       
-      const cliCmd = generateCLIDeploymentCommand(deploymentInput, WEILCHAIN_CONFIG);
-      setCLICommand(cliCmd);
-      setShowCLIModal(true);
-      
-      alert(
-        `📋 CLI DEPLOYMENT REQUIRED\n\n` +
-        `WAuth does not support browser-based transactions.\n` +
-        `\n` +
-        `A CLI command has been generated for you.\n` +
-        `Please use the Weil CLI to deploy your workflow.\n` +
-        `\n` +
-        `Instructions will be shown in the modal.`
-      );
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+        const response = await fetch(`${backendUrl}/api/deploy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(deploymentInput),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || errorData.message || 'Backend deployment failed');
+        }
+
+        const result = await response.json();
+        console.log('[Deploy] ✅ Deployment successful:', result);
+
+        // Show success message with transaction details
+        alert(
+          `✅ WORKFLOW DEPLOYED SUCCESSFULLY!\n\n` +
+          `Workflow ID: ${result.workflowId}\n` +
+          `Transaction Hash: ${result.txHash}\n` +
+          `Contract Address: ${result.contractAddress}\n` +
+          `\n` +
+          `View on Explorer: ${result.explorer}\n` +
+          `\n` +
+          `Your workflow is now live on WeilChain!`
+        );
+
+        // Store workflow locally
+        const savedWorkflows = JSON.parse(localStorage.getItem('savedWorkflows') || '[]');
+        savedWorkflows.push({
+          ...workflow,
+          txHash: result.txHash,
+          contractAddress: result.contractAddress,
+          deployedAt: new Date().toISOString(),
+        });
+        localStorage.setItem('savedWorkflows', JSON.stringify(savedWorkflows));
+
+        setIsExecuting(false);
+        return;
+
+      } catch (apiError: any) {
+        console.error('[Deploy] Backend API error:', apiError);
+        throw new WeilExecutionError(
+          `Backend deployment failed: ${apiError.message}\n\n` +
+          `Please check that the backend server is running at ${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}`
+        );
+      }
       
     } catch (error: any) {
       // Handle deployment errors with detailed, user-friendly messages

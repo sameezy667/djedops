@@ -1023,21 +1023,40 @@ export async function deployWorkflowOnWeil(
     deployed_at: input.deployed_at,
   };
   
-  console.log('[WeilSDK] Deploying workflow:', {
+  console.log('[WeilSDK] Deploying workflow via backend API:', {
     workflow_id: input.workflow_id,
     name: input.name,
     contract: config.coordinatorContractAddress,
-    method: config.deployMethod,
   });
   
-  // Execute deployment on-chain
-  const { receipt } = await executeContract({
-    contractAddress: config.coordinatorContractAddress,
-    method: config.deployMethod,
-    args: deploymentArgs,
+  // Deploy via backend API instead of browser wallet
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+  const response = await fetch(`${backendUrl}/api/deploy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(deploymentArgs),
   });
   
-  console.log('[WeilSDK] Workflow deployed successfully:', receipt.txHash);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new WeilExecutionError(
+      `Backend deployment failed: ${error.error || error.message || response.statusText}`
+    );
+  }
+  
+  const result = await response.json();
+  console.log('[WeilSDK] Workflow deployed successfully via backend:', result.txHash);
+  
+  // Convert backend response to TransactionReceipt
+  const receipt: TransactionReceipt = {
+    txHash: result.txHash,
+    timestamp: Math.floor(new Date(result.timestamp).getTime() / 1000),
+    status: 'confirmed' as const,
+    value: null,
+    raw: result,
+  };
   
   return receipt;
 }
