@@ -1,4 +1,30 @@
-// Calculation utilities for DjedOps Dashboard
+/**
+ * Calculation Utilities for DjedOps Dashboard
+ * 
+ * Purpose:
+ * Core mathematical functions for Djed protocol metrics and analysis.
+ * All calculations follow the official Djed protocol specifications.
+ * 
+ * Functions:
+ * - calculateReserveRatio(): Djed reserve ratio calculation
+ * - calculatePCI(): Protocol Confidence Index (0-100)
+ * - getConfidenceLevel(): Confidence level classification
+ * - calculateDSI(): Djed Stability Index
+ * - Additional protocol-specific calculations
+ * 
+ * Safety:
+ * - All functions include null/undefined checks
+ * - Division by zero protection
+ * - Warning logs for invalid inputs
+ * - Graceful fallbacks to safe defaults
+ * 
+ * Testing:
+ * - Unit tests in __tests__/calculations.test.ts
+ * - Target coverage: 100%
+ * - Property-based testing with fast-check
+ * 
+ * Requirements: 1.1, 1.2, 2.1, 2.2, 3.1
+ */
 
 /**
  * Calculate the reserve ratio for the Djed protocol

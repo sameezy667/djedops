@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Unbounded, JetBrains_Mono, Space_Mono } from "next/font/google";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import GridBackground from "../components/GridBackground";
+import { ClientProviders } from "@/components/ClientProviders";
 import "./globals.css";
 
 // Display fonts - optimized loading with preload
@@ -122,7 +123,9 @@ export default function RootLayout({
         {/* Main content */}
         <div id="main-content" className="relative" style={{ zIndex: 10 }}>
           <ErrorBoundary>
-            {children}
+            <ClientProviders>
+              {children}
+            </ClientProviders>
           </ErrorBoundary>
         </div>
       </body>

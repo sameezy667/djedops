@@ -10,6 +10,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { MarketOpportunityCard } from '../components/MarketOpportunityCard';
 import { StabilityGauge } from '../components/StabilityGauge';
 import { WalletConnect } from '../components/WalletConnect';
+import { WAuthConnect } from '../components/WAuthConnect';
 import { WalletBalance } from '../components/WalletBalance';
 import { SentinelToggle, SentinelPanel, SentinelShield } from '../components/SentinelPanel';
 import { PerformanceToggle } from '../components/PerformanceToggle';
@@ -33,6 +34,7 @@ import { calculateReserveRatio, determineSystemStatus } from '@/lib/calculations
 import { calculateDSI } from '@/lib/utils/dsiCalculator';
 import { useDexPrice } from '@/lib/hooks/useDexPrice';
 import { API_CONFIG, BLOCKCHAIN, RESERVE_RATIO } from '@/lib/constants';
+import { useWeilChain } from '@/lib/context/WeilChainContext'; // Import for cross-app communication
 
 // Dynamically import HeroSection to avoid SSR issues with React Three Fiber
 const HeroSection = dynamic(() => import('../components/HeroSection').then(mod => ({ default: mod.HeroSection })), {
@@ -46,7 +48,31 @@ const HeroSection = dynamic(() => import('../components/HeroSection').then(mod =
 
 
 
-export default function Home() {
+/**
+ * View Mode Type - determines which sections to show
+ */
+export type ViewMode = 'monitor' | 'simulator' | 'sentinel' | 'transactions' | 'arbitrage'
+
+export interface HomeProps {
+  viewMode?: ViewMode // Optional: if not set, show everything
+}
+
+export default function Home({ viewMode }: HomeProps = {}) {
+  /**
+   * Helper function to determine if a section should be shown
+   * based on the active view mode.
+   * 
+   * @param section - The section identifier
+   * @returns true if section should be visible
+   */
+  const shouldShow = (section: ViewMode): boolean => {
+    if (!viewMode) return true // Show everything if no mode set
+    return viewMode === section
+  }
+
+  // Cross-app communication: Get protocol status from WeilChain context
+  const { protocolStatus } = useWeilChain()
+
   // Detect demo mode from URL parameter
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [transactions, setTransactions] = useState<TransactionEvent[]>([]);
@@ -384,8 +410,35 @@ export default function Home() {
             <PerformanceToggle />
             <ShareButton status={displayStatus} reserveRatio={displayRatio} />
             <WalletConnect />
+            <WAuthConnect />
           </div>
         </div>
+
+        {/* CROSS-APP COMMUNICATION: Critical Protocol Banner (Triggered by Sentinel) */}
+        {shouldShow('monitor') && protocolStatus === 'CRITICAL' && (
+          <div className="border-2 border-red-500 bg-red-950 bg-opacity-80 mx-8 mt-4 mb-4 p-6 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">⚠️</div>
+              <div>
+                <div className="text-red-500 font-bold text-xl mb-1">
+                  [CRITICAL_ALERT]
+                </div>
+                <div className="text-red-300 font-mono text-sm">
+                  Critical instability detected by Sentinel One module. Protocol stress test triggered emergency state.
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const { setProtocolStatus } = useWeilChain()
+                  setProtocolStatus('OPTIMAL')
+                }}
+                className="ml-auto border border-red-500 px-4 py-2 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-sm"
+              >
+                [ACKNOWLEDGE]
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-6 md:py-12">
         {/* Wallet Balance Display (top-right corner) */}
@@ -444,116 +497,180 @@ export default function Home() {
           />
         )}
         
-        {/* Hero Section */}
-        <HeroSection
-          reserveRatio={displayRatio}
-          baseReserves={djedData.baseReserves}
-          oraclePrice={djedData.oraclePrice}
-          systemStatus={displayStatus}
-          isSimulated={isSimulating}
-          contractAddress={BLOCKCHAIN.SIGMAUSD_CONTRACT_ADDRESS}
-          onLaunchSimulation={handleLaunchSimulation}
-          onInspectProtocol={() => setIsProtocolInspectorOpen(true)}
-        />
-
-        {/* Historical Timeline Chart */}
-        <div className="mt-8 max-w-7xl mx-auto">
-          <ReserveHistoryChart />
-        </div>
-
-        {/* Analytics Grid - DSI, Arbitrage Monitor & Stress Test */}
-        <div className="mt-12 md:mt-24 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Djed Stability Index */}
-          <div>
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-              Stability Index
-            </h2>
-            <StabilityGauge
-              dsi={dsi}
-              isDexOffline={dexError}
-              lastCalculated={lastDexUpdate}
+        {/* Hero Section - MONITOR MODE */}
+        {shouldShow('monitor') && (
+          <>
+            <HeroSection
+              reserveRatio={displayRatio}
+              baseReserves={djedData.baseReserves}
+              oraclePrice={djedData.oraclePrice}
+              systemStatus={displayStatus}
+              isSimulated={isSimulating}
+              contractAddress={BLOCKCHAIN.SIGMAUSD_CONTRACT_ADDRESS}
+              onLaunchSimulation={handleLaunchSimulation}
+              onInspectProtocol={() => setIsProtocolInspectorOpen(true)}
             />
-          </div>
 
-          {/* Arbitrage Monitor */}
-          <div>
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-              Arbitrage Monitor
-            </h2>
-            <MarketOpportunityCard />
-          </div>
+            {/* Historical Timeline Chart */}
+            <div className="mt-8 max-w-7xl mx-auto">
+              <ReserveHistoryChart />
+            </div>
+          </>
+        )}
 
-          {/* Peg Resilience Simulator */}
-          <div>
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-              Stress Testing
-            </h2>
-            <StressTest />
-          </div>
-        </div>
-
-        {/* Protocol Confidence & Risk Analysis */}
-        <div className="mt-12 md:mt-16 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          {/* Protocol Confidence Index */}
-          <div>
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-              Protocol Confidence
-            </h2>
-            <ConfidenceGauge 
-              dsi={displayRatio} 
-              volatility={
-                djedData && dexPrice && !dexError
-                  ? Math.abs(((dexPrice - djedData.oraclePrice) / djedData.oraclePrice) * 100)
-                  : 3.5
-              } 
-            />
-          </div>
-
-          {/* Root Cause Analyzer */}
-          <div>
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-              Risk Analysis
-            </h2>
-            <RootCauseAnalyzer 
-              currentDSI={displayRatio}
-              ergPrice={djedData.oraclePrice}
-              oraclePrice={dexPrice || djedData.oraclePrice}
-            />
-          </div>
-        </div>
-
-        {/* Oracle Network Health */}
-        <div className="mt-24 max-w-7xl mx-auto">
-          <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
-            Network Health
-          </h2>
-          <OracleConsensus />
-        </div>
-
-        {/* Terminal Feed - Show in both demo and live mode */}
-        {(isDemoMode ? transactions.length > 0 : true) && (
-          <div className="mt-24 max-w-7xl mx-auto">
-            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight flex items-center gap-3">
-              <span className="text-[#39FF14] text-2xl">▸</span>
-              Transaction Feed
-              {!isDemoMode && <span className="text-xs text-[#39FF14]/70 font-normal tracking-normal ml-2">LIVE</span>}
-            </h2>
-            {feedError && !isDemoMode ? (
-              <div className="bg-red-500/10 border border-red-500/30 p-4 rounded text-red-400">
-                Failed to load transactions: {feedError.message}
-              </div>
-            ) : transactions.length === 0 && !feedLoading && !isDemoMode ? (
-              <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded text-yellow-400">
-                No transactions found. The API might be returning empty results.
-              </div>
-            ) : (
-              <TerminalFeed events={transactions} isLoading={!isDemoMode && feedLoading} />
-            )}
+        {/* SIMULATOR MODE - Chart + Controls */}
+        {shouldShow('simulator') && (
+          <div className="mt-8 max-w-7xl mx-auto">
+            <div className="border-l-4 border-[#39FF14] pl-6 mb-8">
+              <h1 className="text-4xl font-bold text-[#39FF14] mb-2">CHRONO-SIM</h1>
+              <p className="text-neutral-400 font-mono">Time Travel & Scenario Testing</p>
+            </div>
+            {/* Price Chart/Simulation Graph */}
+            <ReserveHistoryChart />
           </div>
         )}
 
-        {/* Simulation Modal */}
-        {djedData && (
+        {/* Analytics Grid - DSI, Arbitrage Monitor & Stress Test */}
+        <div className="mt-12 md:mt-24 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Djed Stability Index - MONITOR MODE */}
+          {shouldShow('monitor') && (
+            <div>
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Stability Index
+              </h2>
+              <StabilityGauge
+                dsi={dsi}
+                isDexOffline={dexError}
+                lastCalculated={lastDexUpdate}
+              />
+            </div>
+          )}
+
+          {/* Arbitrage Monitor - MONITOR MODE */}
+          {shouldShow('monitor') && (
+            <div>
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Arbitrage Monitor
+              </h2>
+              <MarketOpportunityCard />
+            </div>
+          )}
+
+          {/* Peg Resilience Simulator - SENTINEL MODE */}
+          {shouldShow('sentinel') && (
+            <div>
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Stress Testing
+              </h2>
+              <StressTest />
+            </div>
+          )}
+        </div>
+
+        {/* ARBITRAGE VIEW (Arb-Hunter) - Centered */}
+        {shouldShow('arbitrage') && (
+          <div className="max-w-4xl mx-auto">
+            <div className="border-l-4 border-yellow-500 pl-6 mb-8">
+              <h1 className="text-4xl font-bold text-yellow-500 mb-2">ARB-HUNTER</h1>
+              <p className="text-neutral-400 font-mono">Real-Time Peg Arbitrage Detector</p>
+            </div>
+            <div className="mt-8">
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Live Arbitrage Opportunities
+              </h2>
+              <MarketOpportunityCard />
+            </div>
+          </div>
+        )}
+
+        {/* Protocol Confidence & Risk Analysis */}
+        <div className="mt-12 md:mt-16 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+          {/* Protocol Confidence Index - MONITOR MODE */}
+          {shouldShow('monitor') && (
+            <div>
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Protocol Confidence
+              </h2>
+              <ConfidenceGauge 
+                dsi={displayRatio} 
+                volatility={
+                  djedData && dexPrice && !dexError
+                    ? Math.abs(((dexPrice - djedData.oraclePrice) / djedData.oraclePrice) * 100)
+                    : 3.5
+                } 
+              />
+            </div>
+          )}
+
+          {/* Root Cause Analyzer - SENTINEL MODE */}
+          {shouldShow('sentinel') && (
+            <div>
+              <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+                Risk Analysis
+              </h2>
+              <RootCauseAnalyzer 
+                currentDSI={displayRatio}
+                ergPrice={djedData.oraclePrice}
+                oraclePrice={dexPrice || djedData.oraclePrice}
+              />
+              
+              {/* CROSS-APP COMMUNICATION: Emergency Alert Trigger */}
+              <div className="mt-8 border-2 border-red-500 p-6">
+                <h3 className="text-xl font-bold text-red-500 mb-4">
+                  [EMERGENCY_PROTOCOL]
+                </h3>
+                <p className="text-sm text-neutral-400 mb-4 font-mono">
+                  Trigger a critical alert that will propagate to all connected applets.
+                  This demonstrates cross-applet communication in the WeilChain ecosystem.
+                </p>
+                <EmergencyAlertButton />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Oracle Network Health - MONITOR MODE */}
+        {shouldShow('monitor') && (
+          <div className="mt-24 max-w-7xl mx-auto">
+            <h2 className="text-3xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight">
+              Network Health
+            </h2>
+            <OracleConsensus />
+          </div>
+        )}
+
+        {/* Terminal Feed removed from monitor mode to avoid duplication - see transactions view mode below */}
+
+        {/* TRANSACTIONS VIEW (Djed Ledger) - Full Width */}
+        {shouldShow('transactions') && (
+          <div className="max-w-7xl mx-auto">
+            <div className="border-l-4 border-[#39FF14] pl-6 mb-8">
+              <h1 className="text-4xl font-bold text-[#39FF14] mb-2">DJED LEDGER</h1>
+              <p className="text-neutral-400 font-mono">Live On-Chain Transaction Explorer</p>
+            </div>
+            <div className="mt-8">
+              <h2 className="text-2xl font-display font-bold text-[#E5E5E5] mb-6 uppercase tracking-tight flex items-center gap-3">
+                <span className="text-[#39FF14] text-2xl">▸</span>
+                Real-Time Transaction Feed
+                {!isDemoMode && <span className="text-xs text-[#39FF14]/70 font-normal tracking-normal ml-2">LIVE</span>}
+              </h2>
+              {feedError && !isDemoMode ? (
+                <div className="bg-red-500/10 border border-red-500/30 p-4 rounded text-red-400">
+                  Failed to load transactions: {feedError.message}
+                </div>
+              ) : transactions.length === 0 && !feedLoading && !isDemoMode ? (
+                <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded text-yellow-400">
+                  No transactions found. The API might be returning empty results.
+                </div>
+              ) : (
+                <TerminalFeed events={transactions} isLoading={!isDemoMode && feedLoading} />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Simulation Modal - SIMULATOR MODE */}
+        {shouldShow('simulator') && djedData && (
           <SimulationModal
             isOpen={isSimulationModalOpen}
             onClose={handleCloseSimulation}
@@ -606,39 +723,41 @@ export default function Home() {
           <div className="text-neutral-600">LATENCY: <span className="text-[#39FF14]">12ms</span></div>
         </div>
 
-        {/* Footer CTA - Aura Style */}
-        <footer className="mt-24 py-16 border-t border-[#E5E5E5]/10">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Headline */}
-            <h2 className="text-4xl md:text-5xl font-black text-[#E5E5E5] leading-tight">
-              Decentralization is Non-Negotiable
-            </h2>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button
-                onClick={handleLaunchSimulation}
-                className="w-full sm:w-auto px-8 py-4 bg-[#39FF14] text-black font-bold text-sm tracking-widest uppercase shadow-[0_0_20px_rgba(57,255,20,0.4)] hover:bg-[#39FF14]/90 hover:shadow-[0_0_30px_rgba(57,255,20,0.6)] transition-all duration-300"
-              >
-                INITIATE PROTOCOL
-              </button>
-              <button
-                onClick={() => setIsWhitePaperModalOpen(true)}
-                className="w-full sm:w-auto px-10 py-4 border-2 border-[#E5E5E5]/20 text-[#E5E5E5]/70 hover:border-[#39FF14]/50 hover:text-[#E5E5E5] font-bold text-sm tracking-widest uppercase text-center transition-all duration-300"
-              >
-                READ WHITE PAPER
-              </button>
+        {/* Footer CTA - MONITOR MODE */}
+        {shouldShow('monitor') && (
+          <footer className="mt-24 py-16 border-t border-[#E5E5E5]/10">
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+              {/* Headline */}
+              <h2 className="text-4xl md:text-5xl font-black text-[#E5E5E5] leading-tight">
+                Decentralization is Non-Negotiable
+              </h2>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button
+                  onClick={handleLaunchSimulation}
+                  className="w-full sm:w-auto px-8 py-4 bg-[#39FF14] text-black font-bold text-sm tracking-widest uppercase shadow-[0_0_20px_rgba(57,255,20,0.4)] hover:bg-[#39FF14]/90 hover:shadow-[0_0_30px_rgba(57,255,20,0.6)] transition-all duration-300"
+                >
+                  INITIATE PROTOCOL
+                </button>
+                <button
+                  onClick={() => setIsWhitePaperModalOpen(true)}
+                  className="w-full sm:w-auto px-10 py-4 border-2 border-[#E5E5E5]/20 text-[#E5E5E5]/70 hover:border-[#39FF14]/50 hover:text-[#E5E5E5] font-bold text-sm tracking-widest uppercase text-center transition-all duration-300"
+                >
+                  READ WHITE PAPER
+                </button>
+              </div>
+              
+              {/* Footer Meta Info */}
+              <div className="pt-8 font-mono text-gray-500 text-xs space-y-1">
+                <p>Last Updated: {djedData.lastUpdated.toLocaleTimeString()}</p>
+                <p>
+                  Data Source: {isDemoMode ? 'Mock Data (Demo Mode)' : 'Ergo Explorer API'}
+                </p>
+              </div>
             </div>
-            
-            {/* Footer Meta Info */}
-            <div className="pt-8 font-mono text-gray-500 text-xs space-y-1">
-              <p>Last Updated: {djedData.lastUpdated.toLocaleTimeString()}</p>
-              <p>
-                Data Source: {isDemoMode ? 'Mock Data (Demo Mode)' : 'Ergo Explorer API'}
-              </p>
-            </div>
-          </div>
-        </footer>
+          </footer>
+        )}
         {/* Close mx-auto max-w-screen-2xl container */}
         </div>
       </main>
@@ -646,8 +765,63 @@ export default function Home() {
       {/* KYA Modal */}
       <KYAModal isOpen={isKYAModalOpen} onClose={() => setIsKYAModalOpen(false)} />
 
-      {/* Time Travel Control Bar */}
-      <TimeTravel />
+      {/* Time Travel Control Bar - SIMULATOR MODE */}
+      {shouldShow('simulator') && <TimeTravel />}
     </div>
   );
+}
+
+/**
+ * Emergency Alert Button Component
+ * 
+ * Triggers critical protocol status that propagates to other applets.
+ * Demonstrates cross-app communication in WeilChain ecosystem.
+ */
+function EmergencyAlertButton() {
+  const { protocolStatus, setProtocolStatus } = useWeilChain()
+  const [isTriggering, setIsTriggering] = useState(false)
+
+  const handleTrigger = async () => {
+    setIsTriggering(true)
+    
+    // Simulate critical protocol event
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    setProtocolStatus('CRITICAL')
+    
+    alert(
+      '🚨 EMERGENCY ALERT TRIGGERED\n\n' +
+      'Critical protocol status has been set.\n' +
+      'Switch to "Workflow Builder" to see Sentinel Policy enforcement.\n' +
+      'The canvas will show a red border and workflows cannot execute.\n\n' +
+      'This demonstrates on-chain policy enforcement and cross-applet communication!'
+    )
+    
+    setIsTriggering(false)
+  }
+
+  const handleReset = () => {
+    setProtocolStatus('OPTIMAL')
+    alert('✅ Protocol status reset to OPTIMAL')
+  }
+
+  return (
+    <div className="flex gap-4">
+      <button
+        onClick={handleTrigger}
+        disabled={isTriggering || protocolStatus === 'CRITICAL'}
+        className="flex-1 border-2 border-red-500 px-6 py-3 text-red-500 hover:bg-red-500 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm"
+      >
+        {isTriggering ? '[TRIGGERING...]' : protocolStatus === 'CRITICAL' ? '[ALERT_ACTIVE]' : '[TRIGGER_EMERGENCY_ALERT]'}
+      </button>
+      {protocolStatus === 'CRITICAL' && (
+        <button
+          onClick={handleReset}
+          className="border border-[#00FF41] px-6 py-3 text-[#00FF41] hover:bg-[#00FF41] hover:text-black transition-colors text-sm"
+        >
+          [RESET]
+        </button>
+      )}
+    </div>
+  )
 }

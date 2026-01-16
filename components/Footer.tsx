@@ -1,3 +1,26 @@
+/**
+ * Footer Component
+ * 
+ * Application footer with social links, documentation, and legal information.
+ * 
+ * Features:
+ * - Social media links (GitHub, Twitter, Discord)
+ * - Documentation and whitepaper access
+ * - KYA (Know Your Applet) modal trigger
+ * - Legal disclaimer display
+ * - Responsive layout
+ * - External link icons with proper security attributes
+ * 
+ * Props:
+ * - onKYAClick: () => void - Optional callback to open KYA modal
+ * 
+ * Security:
+ * - All external links use noopener noreferrer for security
+ * - Target _blank for external navigation
+ * 
+ * Requirements: 9.1, 9.2, 10.4
+ */
+
 'use client';
 
 import { FileText, Github, Twitter, MessageCircle, ExternalLink, AlertTriangle } from 'lucide-react';

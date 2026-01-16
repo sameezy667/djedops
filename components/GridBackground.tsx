@@ -1,3 +1,30 @@
+/**
+ * GridBackground Component
+ * 
+ * Animated grid background for the application.
+ * Provides a cyberpunk-style visual effect with glowing grid lines.
+ * 
+ * Features:
+ * - Fixed position fullscreen grid overlay
+ * - Non-interactive (pointer-events-none)
+ * - Radial gradient glow effect
+ * - CSS-based grid pattern
+ * - Performance-optimized with transform properties
+ * 
+ * Styling:
+ * - Grid cell size: configurable via CSS
+ * - Primary color: #39FF14 (terminal green)
+ * - Glow intensity: radial gradient from center
+ * - Z-index: 1 (below content, above background)
+ * 
+ * Performance:
+ * - Uses CSS transforms for better GPU acceleration
+ * - No JavaScript animation (pure CSS)
+ * - Pointer events disabled to avoid interaction overhead
+ * 
+ * Requirements: 10.1, 10.5
+ */
+
 'use client';
 
 export default function GridBackground() {

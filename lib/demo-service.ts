@@ -1,3 +1,33 @@
+/**
+ * Demo Service
+ * 
+ * Provides mock data loading and management for demo mode.
+ * Enables testing and demonstration without live API connection.
+ * 
+ * Features:
+ * - Mock data loading from JSON file
+ * - Fallback data generation
+ * - URL parameter detection (?demo=true)
+ * - Transaction history simulation
+ * - Protocol metrics mocking
+ * 
+ * Usage:
+ * ```typescript
+ * if (DemoService.isDemoMode()) {
+ *   const data = await DemoService.loadMockData();
+ * }
+ * ```
+ * 
+ * Data Structure:
+ * - oraclePrice: Current ERG/USD price
+ * - baseReserves: Total ERG in reserve
+ * - sigUsdCirculation: SigUSD supply
+ * - shenCirculation: SHEN supply
+ * - transactions: Historical transaction events
+ * 
+ * Requirements: 5.1, 5.2, 8.1
+ */
+
 import { TransactionEvent } from './types';
 
 export interface MockData {

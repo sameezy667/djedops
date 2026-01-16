@@ -83,6 +83,34 @@ export function HeroSection({
             oraclePrice={oraclePrice}
             onInspectProtocol={onInspectProtocol}
           />
+
+          {/* Navigation Buttons - Updated to 4-column grid for INTEL */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            <a
+              href="/dashboard"
+              className="border-2 border-[#00D4FF] bg-black hover:bg-[#00D4FF] hover:text-black px-4 md:px-6 py-4 text-center text-[#00D4FF] hover:shadow-[0_0_20px_rgba(0,212,255,0.5)] transition-all duration-300 font-mono font-bold text-xs md:text-sm"
+            >
+              [DASHBOARD]
+            </a>
+            <a
+              href="/workflows"
+              className="border-2 border-[#39FF14] bg-black hover:bg-[#39FF14] hover:text-black px-4 md:px-6 py-4 text-center text-[#39FF14] hover:shadow-[0_0_20px_rgba(57,255,20,0.5)] transition-all duration-300 font-mono font-bold text-xs md:text-sm"
+            >
+              [WORKFLOWS]
+            </a>
+            <a
+              href="/marketplace"
+              className="border-2 border-[#FFD700] bg-black hover:bg-[#FFD700] hover:text-black px-4 md:px-6 py-4 text-center text-[#FFD700] hover:shadow-[0_0_20px_rgba(255,215,0,0.5)] transition-all duration-300 font-mono font-bold text-xs md:text-sm"
+            >
+              [MARKETPLACE]
+            </a>
+            <a
+              href="/intel"
+              className="border-2 border-[#FF00FF] bg-black hover:bg-[#FF00FF] hover:text-black px-4 md:px-6 py-4 text-center text-[#FF00FF] hover:shadow-[0_0_20px_rgba(255,0,255,0.5)] transition-all duration-300 font-mono font-bold text-xs md:text-sm"
+            >
+              [INTEL]
+            </a>
+          </div>
         </div>
 
           {/* Right Column: Reserve Visualization (5 columns) */}

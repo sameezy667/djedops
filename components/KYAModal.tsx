@@ -139,12 +139,11 @@ export function KYAModal({ isOpen, onClose }: KYAModalProps) {
 
                 <div className="bg-orange-500/10 border-l-4 border-orange-500 pl-4 py-3 mt-6">
                   <p className="text-orange-400 font-semibold mb-2">
-                    ⚠️ Hackathon Prototype Notice
+                    ⚠️ Important Notice
                   </p>
                   <p className="text-sm text-zinc-400">
-                    This software was developed for the Ergo Blockchain Hackathon 2025 and should be 
-                    treated as a demonstration prototype. It has not undergone formal security audits 
-                    and is not recommended for production use with real funds.
+                    This software is provided as-is for demonstration purposes. It has not undergone 
+                    formal security audits and is not recommended for production use with real funds.
                   </p>
                 </div>
               </div>

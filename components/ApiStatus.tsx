@@ -1,3 +1,24 @@
+/**
+ * ApiStatus Component
+ * 
+ * Visual API connection status indicator with retry functionality.
+ * Displays current connection state, latency, and provides error recovery.
+ * 
+ * Features:
+ * - Real-time connection monitoring
+ * - Color-coded status indicators (connected, disconnected, warning)
+ * - Manual retry mechanism for failed connections
+ * - Animated status transitions
+ * - Latency display
+ * 
+ * Props:
+ * - isConnected: boolean - Current API connection state
+ * - label: string - Display label for the API service
+ * - onRetry: () => void - Optional callback for retry action
+ * 
+ * Requirements: 4.1, 4.2, 5.3
+ */
+
 'use client';
 
 import { motion } from 'framer-motion';
