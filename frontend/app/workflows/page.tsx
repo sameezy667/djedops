@@ -11,9 +11,19 @@ import { ParsedIntent } from '@/lib/intent-engine';
 export const dynamic = 'force-dynamic';
 
 export default function WorkflowsPage() {
-  const { isConnected } = useWeilChain();
+  const { isConnected, address, wallet, connect } = useWeilChain();
   const [activeTab, setActiveTab] = useState<'builder' | 'history'>('builder');
   const [generatedWorkflow, setGeneratedWorkflow] = useState<ParsedIntent | null>(null);
+
+  /**
+   * Debug: Log connection state
+   */
+  console.log('[WorkflowsPage] Connection State:', { 
+    isConnected, 
+    address, 
+    hasWallet: !!wallet,
+    localStorage: typeof window !== 'undefined' ? localStorage.getItem('wauth_connected') : null
+  });
 
   /**
    * Handle workflow generation from semantic command bar
@@ -73,16 +83,24 @@ export default function WorkflowsPage() {
       {!isConnected && (
         <div className="border-b border-yellow-500/30 bg-yellow-900/20">
           <div className="max-w-[1800px] mx-auto px-8 py-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">⚠️</div>
-              <div>
-                <div className="text-yellow-500 font-bold text-sm">
-                  [WALLET_CONNECTION_REQUIRED]
-                </div>
-                <div className="text-yellow-300/70 font-mono text-xs">
-                  Connect your WeilWallet to create and deploy workflows
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">⚠️</div>
+                <div>
+                  <div className="text-yellow-500 font-bold text-sm">
+                    [WALLET_CONNECTION_REQUIRED]
+                  </div>
+                  <div className="text-yellow-300/70 font-mono text-xs">
+                    Connect your WeilWallet to create and deploy workflows
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={connect}
+                className="px-4 py-2 bg-[#39FF14] text-black font-mono text-sm hover:bg-[#39FF14]/80 transition-colors"
+              >
+                [CONNECT_WALLET]
+              </button>
             </div>
           </div>
         </div>

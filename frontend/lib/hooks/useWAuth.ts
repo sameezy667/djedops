@@ -202,17 +202,36 @@ export function useWAuth(): UseWAuthReturn {
       const hasWallet = win.WeilWallet || win.wauth || win.weilliptic || win.weilWallet || win.weillipticWallet || win.weil;
       
       if (hasWallet) {
+        console.log('[WAuth] Auto-reconnecting from localStorage...');
         // Silently try to reconnect
-        connect().catch(() => {
+        connect().catch((err) => {
+          console.log('[WAuth] Auto-reconnect failed:', err);
           // Clear stored connection state if reconnection fails
           localStorage.removeItem(STORAGE_KEY);
         });
       } else {
         // Wallet not installed, clear the stored state
+        console.log('[WAuth] Wallet not detected, clearing stored connection state');
         localStorage.removeItem(STORAGE_KEY);
       }
     }
-  }, [connect]);
+    
+    // Also listen for wallet extension events (if the wallet becomes available)
+    const checkWalletPeriodically = setInterval(() => {
+      const win = window as any;
+      const hasWallet = win.WeilWallet || win.wauth || win.weilliptic || win.weilWallet;
+      
+      // If wallet is detected and we're supposed to be connected but aren't, try to reconnect
+      if (hasWallet && wasConnected && !isConnected) {
+        console.log('[WAuth] Wallet detected during periodic check, attempting reconnect...');
+        connect().catch(() => {
+          localStorage.removeItem(STORAGE_KEY);
+        });
+      }
+    }, 2000); // Check every 2 seconds
+    
+    return () => clearInterval(checkWalletPeriodically);
+  }, [connect, isConnected]);
 
   return {
     isConnected,
