@@ -1,0 +1,43 @@
+# Render Deployment Configuration for DjedOPS Backend
+
+services:
+  - type: web
+    name: djedops-backend
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: PORT
+        value: 10000
+      
+      - key: FRONTEND_URL
+        value: https://your-frontend-url.vercel.app
+      
+      - key: WEIL_RPC_ENDPOINT
+        value: https://sentinel.unweil.me
+      
+      - key: WEIL_COORDINATOR_ADDRESS
+        value: weil1coordinator00000000000000000000000
+      
+      - key: WEIL_TELEPORT_GATEWAY_ADDRESS
+        value: weil1teleport000000000000000000000000
+      
+      - key: WEIL_PRIVATE_KEY
+        sync: false
+        # Set this in Render dashboard as a secret
+      
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      
+      - key: LOG_LEVEL
+        value: info

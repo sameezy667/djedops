@@ -53,11 +53,9 @@ const HeroSection = dynamic(() => import('../components/HeroSection').then(mod =
  */
 export type ViewMode = 'monitor' | 'simulator' | 'sentinel' | 'transactions' | 'arbitrage'
 
-export interface HomeProps {
-  viewMode?: ViewMode // Optional: if not set, show everything
-}
-
-export default function Home({ viewMode }: HomeProps = {}) {
+export default function Home() {
+  // Default to showing everything (no view mode filter)
+  const viewMode = undefined;
   /**
    * Helper function to determine if a section should be shown
    * based on the active view mode.

@@ -7,6 +7,9 @@ import { SemanticCommandBar } from '../../components/SemanticCommandBar';
 import { useWeilChain } from '@/lib/context/WeilChainContext';
 import { ParsedIntent } from '@/lib/intent-engine';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 export default function WorkflowsPage() {
   const { isConnected } = useWeilChain();
   const [activeTab, setActiveTab] = useState<'builder' | 'history'>('builder');

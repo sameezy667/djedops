@@ -64,31 +64,21 @@ const HeroSection = dynamic(
   }
 )
 
-/**
- * Props interface for DjedOPS Applet
- * Receives wallet context from parent marketplace
- */
-export interface DjedOPSAppletProps {
-  wallet?: WeilWalletConnection | null
-  address?: string | null
-}
+// Force dynamic rendering for this page
+export const dynamicParams = false;
+export const revalidate = 0;
 
 /**
  * DjedOPS Applet Component
  * 
- * This is the refactored version of the original DjedOPS page.
- * It can function both as:
- * 1. Standalone page (uses useWeilWallet hook)
- * 2. Embedded applet (receives wallet from parent via props)
+ * This is the standalone DjedOPS page that uses the WeilChain context.
+ * For embedded usage, the component uses the WeilChainContext provider.
  */
-export default function DjedOPSApplet({ 
-  wallet: externalWallet, 
-  address: externalAddress 
-}: DjedOPSAppletProps) {
-  // Use external wallet if provided, otherwise use hook
+export default function DjedOPSApplet() {
+  // Use WeilChain context hook
   const hookWallet = useWeilWallet()
-  const wallet = externalWallet ?? hookWallet.wallet
-  const address = externalAddress ?? hookWallet.address
+  const wallet = hookWallet.wallet
+  const address = hookWallet.address
   const isConnected = !!(wallet && address)
 
   // State management (same as original)
@@ -137,7 +127,7 @@ export default function DjedOPSApplet({
 
   // Calculate metrics (same as original)
   const reserveRatio = djedData?.reserveRatio ?? null
-  const systemStatus = djedData ? determineSystemStatus(djedData) : 'unknown'
+  const systemStatus: 'NORMAL' | 'CRITICAL' = (djedData && djedData.reserveRatio) ? determineSystemStatus(djedData.reserveRatio) : 'NORMAL'
   const dsi = (djedData?.baseReserves && djedData?.reserveRatio && dexPrice)
     ? calculateDSI(djedData.baseReserves, djedData.reserveRatio, dexPrice)
     : null
@@ -162,11 +152,14 @@ export default function DjedOPSApplet({
 
       {/* All existing DjedOPS components and layout */}
       {/* Hero Section */}
-      <HeroSection 
-        reserveRatio={reserveRatio}
-        dsi={dsi}
+      <HeroSection
+        reserveRatio={reserveRatio ?? 0}
+        baseReserves={djedData?.baseReserves ?? 0}
+        oraclePrice={djedData?.oraclePrice ?? 0}
         systemStatus={systemStatus}
-        isLoading={isLoading}
+        isSimulated={isDemoMode}
+        onLaunchSimulation={() => setIsProtocolInspectorOpen(true)}
+        onInspectProtocol={() => setIsProtocolInspectorOpen(true)}
       />
 
       {/* Main Dashboard Content */}
