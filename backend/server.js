@@ -227,15 +227,14 @@ app.post('/api/deploy', async (req, res) => {
       env.WC_PATH = wcDir;
     }
 
-    console.log('[DEPLOY] Calling widl-cli...');
+    console.log('[DEPLOY] Calling widl CLI...');
 
-    // Call widl-cli to deploy
-    const widlPath = process.env.WIDL_CLI_PATH || 'widl-cli';
+    // Call widl (following WeilChain documentation, not widl-cli)
+    const widlPath = process.env.WIDL_CLI_PATH || 'widl';
     const coordinator = process.env.COORDINATOR_CONTRACT_ADDRESS;
     
-    // For now, we'll simulate the deployment since we don't have real coordinator
-    // TODO: Replace with actual widl-cli call when coordinator address is available
-    const command = `${widlPath} deploy --contract ${coordinator} --method deploy_workflow --args-file ${workflowFile}`;
+    // WeilChain widl command format from documentation
+    const command = `${widlPath} deploy ${workflowFile} --method deploy_workflow --args-json '${JSON.stringify({workflow_id: workflowData.workflow_id, name, owner, workflow_data: JSON.stringify(workflow)})}'`;
     
     console.log(`[DEPLOY] Command: ${command}`);
 

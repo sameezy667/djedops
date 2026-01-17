@@ -1,8 +1,13 @@
 /**
  * Deploy Coordinator Contract (Node.js)
  * 
- * Cross-platform deployment script that works on Windows, Mac, and Linux.
- * This is a FREE alternative to using Render Shell.
+ * Follows official WeilChain documentation for contract deployment.
+ * Uses `widl` CLI (not widl-cli) as per WeilChain docs.
+ * 
+ * Prerequisites:
+ *   - widl CLI installed (see https://docs.unweil.me)
+ *   - WeilChain wallet set up
+ *   - WEIL tokens for gas
  * 
  * Usage:
  *   node scripts/deploy-coordinator.js
@@ -24,16 +29,16 @@ console.log('==================================================');
 console.log('🚀 Deploying Workflow Coordinator Contract');
 console.log('==================================================\n');
 
-// Check widl-cli
+// Check widl CLI (following WeilChain docs)
 console.log('📋 Checking prerequisites...');
 try {
-  const version = execSync('widl-cli --version', { encoding: 'utf8' });
-  console.log(`✓ widl-cli found: ${version.trim()}`);
+  const version = execSync('widl --version', { encoding: 'utf8' });
+  console.log(`✓ widl CLI found: ${version.trim()}`);
 } catch (error) {
-  console.error('❌ ERROR: widl-cli not found!');
-  console.error('\nPlease install widl-cli first:');
-  console.error('  Windows: https://install.unweil.me/widl-cli-windows.zip');
-  console.error('  Mac/Linux: curl -sSL https://install.unweil.me | bash');
+  console.error('❌ ERROR: widl CLI not found!');
+  console.error('\nPlease install widl CLI first:');
+  console.error('  Visit: https://docs.unweil.me');
+  console.error('  Or contact WeilChain for CLI access');
   process.exit(1);
 }
 
@@ -57,38 +62,25 @@ if (!existsSync(contractPath)) {
   process.exit(1);
 }
 
-console.log(`✓ Contract file found: ${contractPath}\n`);
+console.log(`✓ Contract file found\n`);
 
-// Compile contract
-console.log('📦 Compiling contract...');
-const compiledPath = join(__dirname, '..', 'contracts', 'coordinator.wasm');
-
-try {
-  execSync(`widl-cli compile "${contractPath}" -o "${compiledPath}"`, {
-    stdio: 'inherit'
-  });
-  console.log('✓ Contract compiled successfully\n');
-} catch (error) {
-  console.error('❌ Compilation failed!');
-  process.exit(1);
-}
-
-// Deploy contract
+// Deploy contract following WeilChain documentation
 console.log('🌐 Deploying to WeilChain...');
 const rpcUrl = process.env.WEIL_RPC_URL || 'https://sentinel.unweil.me';
 console.log(`   Network: ${rpcUrl}`);
 console.log(`   From: ${process.env.WALLET_ADDRESS}\n`);
 
 try {
+  // Following WeilChain docs: widl deploy <file> --method <method> --args <args>
   const output = execSync(
-    `widl-cli deploy "${compiledPath}" --from "${process.env.WALLET_ADDRESS}" --gas auto --rpc "${rpcUrl}"`,
-    { encoding: 'utf8' }
+    `widl deploy ${contractPath} --method deploy_workflow --args-json '{"workflow_id":"init","name":"coordinator","workflow_data":"0x00"}'`,
+    { encoding: 'utf8', stdio: 'pipe' }
   );
 
   console.log(output);
 
-  // Extract contract address
-  const addressMatch = output.match(/contract address:\s*(weil1[a-z0-9]+)/i);
+  // Parse contract address from output (format: "contract address: weil1...")
+  const addressMatch = output.match(/contract[_\s]address[:\s]+(weil1[a-z0-9]+)/i);
   
   if (addressMatch) {
     const contractAddress = addressMatch[1];
@@ -112,20 +104,27 @@ try {
     console.log('🔧 Next Steps:');
     console.log('1. Go to Render Dashboard → Your Backend Service');
     console.log('2. Click "Environment" tab');
-    console.log('3. Update COORDINATOR_CONTRACT_ADDRESS with:');
-    console.log(`   ${contractAddress}`);
+    console.log('3. Update these variables:');
+    console.log(`   COORDINATOR_CONTRACT_ADDRESS=${contractAddress}`);
+    console.log(`   DEPLOYMENT_MODE=mainnet`);
     console.log('4. Click "Save Changes"');
     console.log('5. Wait for Render to redeploy (~2 minutes)\n');
-    console.log('After that, your workflows will deploy for REAL! 🎉');
+    console.log('Your workflows will then deploy for REAL on WeilChain! 🎉');
     console.log('==================================================');
     
   } else {
     console.log('\n⚠️  Could not parse contract address from output.');
     console.log('Please manually extract it from the output above.');
+    console.log('Look for a line like: "contract address: weil1..."');
   }
 
 } catch (error) {
   console.error('❌ Deployment failed!');
   console.error(error.message);
+  console.error('\nTroubleshooting:');
+  console.error('  - Ensure widl CLI is properly installed');
+  console.error('  - Check you have WEIL tokens for gas fees');
+  console.error('  - Verify wallet private key is correct');
+  console.error('  - Try running: widl setup -s');
   process.exit(1);
 }
