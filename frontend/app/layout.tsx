@@ -84,12 +84,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="DjedOps" />
         
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
+        <link rel="apple-touch-icon" href="/Gemini_Generated_Image_fan86gfan86gfan8.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/Gemini_Generated_Image_fan86gfan86gfan8.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/Gemini_Generated_Image_fan86gfan86gfan8.png" />
         
         {/* Favicon */}
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/Gemini_Generated_Image_fan86gfan86gfan8.png" />
       </head>
       <body
         className={`${inter.variable} ${unbounded.variable} ${jetbrainsMono.variable} ${spaceMono.variable} antialiased bg-void text-textPrimary`}
