@@ -84,6 +84,9 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy - Required when behind Render/Heroku/etc reverse proxy
+app.set('trust proxy', 1);
+
 // CORS Configuration - Allow multiple origins
 const allowedOrigins = [
   'http://localhost:3000',
@@ -196,8 +199,8 @@ app.post('/api/deploy', async (req, res) => {
       deployed_at: new Date().toISOString()
     };
 
-    // Write workflow to temp file (Windows-compatible)
-    const tempDir = process.env.TEMP || process.env.TMP || 'C:\\Windows\\Temp';
+    // Write workflow to temp file (cross-platform)
+    const tempDir = os.tmpdir(); // Use os.tmpdir() for cross-platform compatibility
     const workflowFile = join(tempDir, `workflow-${workflowData.workflow_id}.json`);
     await fs.writeFile(workflowFile, JSON.stringify(workflowData, null, 2));
 
@@ -211,15 +214,18 @@ app.post('/api/deploy', async (req, res) => {
       PATH: process.env.PATH
     };
 
-    // Create private key file for widl-cli (Windows-compatible)
+    // Create private key file for widl-cli (cross-platform)
     const wcDir = join(tempDir, '.weilliptic');
     await fs.mkdir(wcDir, { recursive: true });
-    await fs.writeFile(
-      join(wcDir, 'private_key.wc'), 
-      process.env.WALLET_PRIVATE_KEY
-    );
-    env.WC_PRIVATE_KEY = wcDir;
-    env.WC_PATH = wcDir;
+    
+    if (process.env.WALLET_PRIVATE_KEY) {
+      await fs.writeFile(
+        join(wcDir, 'private_key.wc'), 
+        process.env.WALLET_PRIVATE_KEY
+      );
+      env.WC_PRIVATE_KEY = wcDir;
+      env.WC_PATH = wcDir;
+    }
 
     console.log('[DEPLOY] Calling widl-cli...');
 
