@@ -171,11 +171,14 @@ app.post('/api/deploy', async (req, res) => {
   const startTime = Date.now();
   
   try {
+    console.log('[DEPLOY] ========================================');
     console.log('[DEPLOY] Received deployment request');
+    console.log('[DEPLOY] Request body:', JSON.stringify(req.body, null, 2));
     
     // Validate request
     const { workflow, name, owner, workflow_id } = req.body;
     if (!workflow || !name || !owner) {
+      console.error('[DEPLOY] Validation failed - missing required fields');
       return res.status(400).json({ 
         error: 'Missing required fields: workflow, name, owner' 
       });
@@ -232,33 +235,41 @@ app.post('/api/deploy', async (req, res) => {
 
     let txHash, deployedAddress;
     
-    try {
-      // Attempt actual deployment
-      const { stdout, stderr } = await execAsync(command, { 
-        env,
-        timeout: 30000 
-      });
+    // Check if we have a real coordinator or a placeholder
+    const isPlaceholder = !coordinator || coordinator.includes('00000000');
+    
+    if (isPlaceholder) {
+      // Using placeholder coordinator - return mock deployment for demo
+      console.log('[DEPLOY] Using placeholder coordinator - returning mock deployment for demo');
+      txHash = `0xdemo${Date.now().toString(16)}`;
+      deployedAddress = `weil1demo${Date.now().toString(36)}${workflow_id.slice(-8)}`;
       
-      console.log('[DEPLOY] widl-cli stdout:', stdout);
-      if (stderr) console.warn('[DEPLOY] widl-cli stderr:', stderr);
+      console.log('[DEPLOY] Mock deployment successful');
+      console.log('[DEPLOY] Mock TX Hash:', txHash);
+      console.log('[DEPLOY] Mock Contract Address:', deployedAddress);
+      console.log('[DEPLOY] Workflow will execute on-chain when real coordinator is deployed');
+      
+    } else {
+      // Attempt real deployment with widl-cli
+      try {
+        const { stdout, stderr } = await execAsync(command, { 
+          env,
+          timeout: 30000 
+        });
+        
+        console.log('[DEPLOY] widl-cli stdout:', stdout);
+        if (stderr) console.warn('[DEPLOY] widl-cli stderr:', stderr);
 
-      // Parse output for tx hash and address
-      const txMatch = stdout.match(/transaction hash:\s*([0-9a-fx]+)/i);
-      const addrMatch = stdout.match(/contract address:\s*(weil1[a-z0-9]+)/i);
-      
-      txHash = txMatch ? txMatch[1] : `0x${Date.now().toString(16)}`;
-      deployedAddress = addrMatch ? addrMatch[1] : `weil1applet${Date.now().toString(36)}`;
-      
-    } catch (cliError) {
-      console.error('[DEPLOY] widl-cli error:', cliError.message);
-      
-      // If CLI fails (expected until we have real coordinator), return mock success
-      if (coordinator.includes('00000000')) {
-        console.log('[DEPLOY] Using placeholder coordinator - returning mock deployment');
-        txHash = `0xmock${Date.now().toString(16)}`;
-        deployedAddress = `weil1mock${Date.now().toString(36)}`;
-      } else {
-        throw cliError;
+        // Parse output for tx hash and address
+        const txMatch = stdout.match(/transaction hash:\s*([0-9a-fx]+)/i);
+        const addrMatch = stdout.match(/contract address:\s*(weil1[a-z0-9]+)/i);
+        
+        txHash = txMatch ? txMatch[1] : `0x${Date.now().toString(16)}`;
+        deployedAddress = addrMatch ? addrMatch[1] : `weil1applet${Date.now().toString(36)}`;
+        
+      } catch (cliError) {
+        console.error('[DEPLOY] widl-cli execution failed:', cliError.message);
+        throw new Error(`CLI execution failed: ${cliError.message}`);
       }
     }
 
@@ -280,10 +291,15 @@ app.post('/api/deploy', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[DEPLOY] Error:', error);
+    console.error('[DEPLOY] ========================================');
+    console.error('[DEPLOY] Deployment failed with error:', error);
+    console.error('[DEPLOY] Error stack:', error.stack);
+    console.error('[DEPLOY] ========================================');
     res.status(500).json({
+      success: false,
       error: 'Deployment failed',
       message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       timestamp: new Date().toISOString()
     });
   }
