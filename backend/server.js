@@ -127,6 +127,42 @@ app.get('/health', (req, res) => {
 });
 
 /**
+ * Wallet connection endpoint
+ * POST /api/wallet/connect
+ * Body: { address: string }
+ */
+app.post('/api/wallet/connect', async (req, res) => {
+  try {
+    const { address } = req.body;
+    
+    if (!address) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Address is required' 
+      });
+    }
+
+    console.log('[WALLET] Connection request from:', address);
+
+    // In a real implementation, you might verify the address or store session info
+    // For now, just acknowledge the connection
+    res.json({ 
+      success: true,
+      message: 'Wallet connected successfully',
+      address: address,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[WALLET] Connection error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Internal server error',
+      error: error.message 
+    });
+  }
+});
+
+/**
  * Deploy workflow endpoint
  * POST /api/deploy
  * Body: { workflow: {...}, name: string, owner: string }

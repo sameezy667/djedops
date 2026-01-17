@@ -129,19 +129,20 @@ export function useWAuth(): UseWAuthReturn {
         throw new Error('Failed to retrieve wallet address. Please ensure WAuth is unlocked and you have an active account.');
       }
 
-      // Verify connection with backend API
+      // Try to verify connection with backend API (optional - don't fail if backend is down)
       try {
         const response = await BackendAPIClient.connectWallet(walletAddress);
-        if (!response.success) {
-          throw new Error(response.message || 'Backend connection failed');
+        if (response.success) {
+          console.log('[WAuth] Backend verified connection:', response.address);
+        } else {
+          console.warn('[WAuth] Backend verification returned error:', response.message);
         }
-        console.log('[WAuth] Backend verified connection:', response.address);
       } catch (backendError: any) {
-        console.warn('[WAuth] Backend verification failed:', backendError.message);
-        // Continue anyway - backend may be unavailable but wallet is connected
+        console.warn('[WAuth] Backend verification failed (continuing anyway):', backendError.message);
+        // Continue - wallet is connected even if backend is unavailable
       }
 
-      // Update state
+      // Update state - connection is successful even without backend
       setAddress(walletAddress);
       setIsConnected(true);
 
