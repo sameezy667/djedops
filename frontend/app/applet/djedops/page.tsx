@@ -64,10 +64,6 @@ const HeroSection = dynamic(
   }
 )
 
-// Force dynamic rendering for this page
-export const dynamicParams = false;
-export const revalidate = 0;
-
 /**
  * DjedOPS Applet Component
  * 
