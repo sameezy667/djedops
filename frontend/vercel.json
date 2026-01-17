@@ -6,29 +6,11 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_BACKEND_URL": {
-      "description": "Backend API URL (e.g., https://your-backend.onrender.com)",
-      "value": "https://djedops-backend.onrender.com"
-    },
-    "NEXT_PUBLIC_GEMINI_API_KEY": {
-      "description": "Gemini AI API key for semantic command bar"
-    },
-    "NEXT_PUBLIC_WEIL_SENTINEL_ENDPOINT": {
-      "description": "WeilChain Sentinel RPC endpoint",
-      "value": "https://sentinel.unweil.me"
-    },
-    "NEXT_PUBLIC_WEIL_BLOCK_EXPLORER": {
-      "description": "WeilChain block explorer URL",
-      "value": "https://www.unweil.me"
-    },
-    "NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS": {
-      "description": "DjedOPS Coordinator contract address",
-      "value": "weil1coordinator00000000000000000000000"
-    },
-    "NEXT_PUBLIC_TELEPORT_GATEWAY_ADDRESS": {
-      "description": "Teleport Gateway contract address",
-      "value": "weil1teleport000000000000000000000000"
-    }
+    "NEXT_PUBLIC_BACKEND_URL": "https://djedops-backend.onrender.com",
+    "NEXT_PUBLIC_WEIL_SENTINEL_ENDPOINT": "https://sentinel.unweil.me",
+    "NEXT_PUBLIC_WEIL_BLOCK_EXPLORER": "https://www.unweil.me",
+    "NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS": "weil1coordinator00000000000000000000000",
+    "NEXT_PUBLIC_TELEPORT_GATEWAY_ADDRESS": "weil1teleport000000000000000000000000"
   },
   "regions": ["iad1"],
   "headers": [
