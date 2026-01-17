@@ -7,7 +7,8 @@
   "scripts": {
     "preinstall": "bash ./bin/install-widl.sh || true",
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "deploy": "node scripts/deploy-coordinator.js"
   },
   "keywords": ["weilchain", "djed", "defi", "workflow"],
   "author": "",

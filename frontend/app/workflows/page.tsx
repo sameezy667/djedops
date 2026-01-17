@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WorkflowBuilder } from '../../components/WorkflowBuilder';
 import { WorkflowExecutionLog } from '../../components/WorkflowExecutionLog';
 import { SemanticCommandBar } from '../../components/SemanticCommandBar';
 import { useWeilChain } from '@/lib/context/WeilChainContext';
 import { ParsedIntent } from '@/lib/intent-engine';
+import { useSearchParams } from 'next/navigation';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,7 @@ export default function WorkflowsPage() {
   const { isConnected, address, wallet, connect } = useWeilChain();
   const [activeTab, setActiveTab] = useState<'builder' | 'history'>('builder');
   const [generatedWorkflow, setGeneratedWorkflow] = useState<ParsedIntent | null>(null);
+  const searchParams = useSearchParams();
 
   /**
    * Debug: Log connection state
@@ -24,6 +26,82 @@ export default function WorkflowsPage() {
     hasWallet: !!wallet,
     localStorage: typeof window !== 'undefined' ? localStorage.getItem('wauth_connected') : null
   });
+
+  /**
+   * Auto-load workflow from URL params (from arbitrage page)
+   */
+  useEffect(() => {
+    const autoConfigParam = searchParams?.get('autoConfig');
+    if (autoConfigParam) {
+      try {
+        const config = JSON.parse(autoConfigParam);
+        
+        // Create optimized arbitrage workflow
+        const arbitrageWorkflow: ParsedIntent = {
+          action: config.signal === 'MINT DJED' ? 'mint' : 'redeem',
+          amount: 1000, // Default $1000 trade
+          applets: [
+            {
+              id: 'price-oracle',
+              name: 'Price Oracle',
+              description: 'Monitor DEX and protocol prices in real-time',
+              category: 'defi',
+              config: {
+                dexPrice: config.dexPrice,
+                protocolPrice: config.protocolPrice,
+                spread: config.spread,
+                refreshInterval: 15,
+              },
+            },
+            {
+              id: 'arb-hunter',
+              name: 'Arb-Hunter',
+              description: 'Detect and execute profitable arbitrage opportunities',
+              category: 'defi',
+              config: {
+                signal: config.signal,
+                minSpread: 0.5, // 0.5% minimum
+                expectedProfit: config.expectedProfit,
+                liquidity: config.liquidity,
+                autoExecute: config.autoExecute || false,
+              },
+            },
+            {
+              id: 'mev-shield',
+              name: 'MEV Shield',
+              description: 'Protect against frontrunning and sandwich attacks',
+              category: 'security',
+              config: {
+                maxSlippage: 0.5, // 0.5% max slippage
+                usePrivateMempool: true,
+                flashbotsProtection: true,
+              },
+            },
+            {
+              id: 'gas-optimizer',
+              name: 'Gas Optimizer',
+              description: 'Optimize transaction gas fees for maximum profit',
+              category: 'optimization',
+              config: {
+                strategy: 'fast', // Execute quickly to capture arbitrage
+                maxGasPrice: 150, // gwei
+                estimateProfit: config.expectedProfit,
+              },
+            },
+          ],
+          confidence: 0.95,
+          reasoning: `Arbitrage opportunity detected: ${config.signal} with ${config.spread.toFixed(2)}% spread. Expected profit: $${config.expectedProfit.toFixed(2)} on $1000 trade. This workflow will monitor prices, execute the arbitrage with MEV protection, and optimize gas fees.`,
+        };
+
+        setGeneratedWorkflow(arbitrageWorkflow);
+        setActiveTab('builder'); // Ensure builder tab is active
+        
+        console.log('[WorkflowsPage] Auto-loaded arbitrage workflow:', arbitrageWorkflow);
+      } catch (error) {
+        console.error('[WorkflowsPage] Failed to parse autoConfig:', error);
+      }
+    }
+  }, [searchParams]);
 
   /**
    * Handle workflow generation from semantic command bar

@@ -5,6 +5,7 @@ import { WorkflowNode, WorkflowConnection, AppletNodeType, APPLET_DEFINITIONS, W
 import { WorkflowNodeComponent } from './WorkflowNode';
 import { executeWorkflow } from '../lib/workflow-engine';
 import { useWeilChain } from '@/lib/context/WeilChainContext';
+import { DeployableWorkflow } from '@/lib/services/workflow-deployment';
 import { TemplateLibrary } from './TemplateLibrary';
 import { WorkflowTemplate } from '@/lib/workflow-templates';
 import { SlippageOptimizer, ExecutionRoute, getSelectedRoute } from './SlippageOptimizer';
@@ -25,7 +26,6 @@ import {
   BridgeTransactionInput
 } from '@/lib/weil-sdk-wrapper';
 import { WEILCHAIN_CONFIG } from '@/lib/weil-config';
-import { generateCLIDeploymentCommand, copyToClipboard, downloadAsFile, type CLIDeploymentCommand } from '@/lib/weil-cli-helper';
 
 /**
  * Calculate gas cost for an applet type
@@ -62,7 +62,7 @@ function detectChainMismatch(
 }
 
 export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: ParsedIntent | null }) {
-  const { isConnected, address, protocolStatus } = useWeilChain();
+  const { isConnected, address, protocolStatus, deployWorkflow, connect } = useWeilChain();
   const [nodes, setNodes] = useState<WorkflowNode[]>([]);
   const [connections, setConnections] = useState<WorkflowConnection[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -70,8 +70,6 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
   const [workflowName, setWorkflowName] = useState('Untitled Workflow');
   const [isExecuting, setIsExecuting] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
-  const [showCLIModal, setShowCLIModal] = useState(false);
-  const [cliCommand, setCLICommand] = useState<CLIDeploymentCommand | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [deploymentReceipt, setDeploymentReceipt] = useState<any>(null);
@@ -365,33 +363,27 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
     const totalGasCost = Math.round(estimatedGas * gasMultipliers[gasSpeed] * (atomicMode ? 0.34 : 1));
     
     try {
-      // STEP 1: Detect wallet (fails loudly if missing)
-      let wallet;
+      // STEP 1: Ensure wallet is connected
       let connectedAddress: string;
       
-      try {
-        wallet = detectInjectedWeilWallet();
-        console.log('[Deploy] Wallet detected successfully');
-      } catch (error) {
-        if (error instanceof WeilWalletNotFoundError) {
-          throw error; // Re-throw to be handled by outer catch
+      if (!isConnected || !address) {
+        // Try to connect if not already connected
+        console.log('[Deploy] Wallet not connected, attempting connection...');
+        await connect();
+        
+        // Check again after connection attempt
+        if (!address) {
+          throw new WeilExecutionError(
+            'Wallet not connected. Please connect your WeilChain wallet extension and try again.\n\n' +
+            'The wallet must be unlocked and connected to this site.'
+          );
         }
-        throw new Error(`Wallet detection failed: ${(error as Error).message}`);
       }
       
-      // STEP 2: Get connected address
-      const address = await getConnectedAddress(wallet);
-      if (!address) {
-        throw new WeilExecutionError(
-          'Wallet not connected. Please connect your WeilChain wallet extension and try again.\n\n' +
-          'The wallet must be unlocked and connected to this site.'
-        );
-      }
-      connectedAddress = address;
-      
+      connectedAddress = address!;
       console.log('[Deploy] Connected address:', connectedAddress);
       
-      // STEP 3: Show deployment confirmation
+      // STEP 2: Show deployment confirmation
       const confirmMessage = 
         `🌀 DEPLOY TO WEILCHAIN\n\n` +
         `Workflow: ${workflowName}\n` +
@@ -411,7 +403,7 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         return;
       }
       
-      // STEP 4: Handle bridge transaction first if workflow includes Teleport node
+      // STEP 3: Handle bridge transaction first if workflow includes Teleport node
       if (hasTeleportNode) {
         const teleportNode = nodes.find(n => n.type === 'teleport_bridge');
         if (teleportNode?.bridgeConfig) {
@@ -447,7 +439,7 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         }
       }
       
-      // STEP 5: Construct workflow deployment payload
+      // STEP 4: Construct workflow deployment payload
       const workflow: Workflow = {
         id: `wf_${Date.now()}`,
         name: workflowName,
@@ -458,67 +450,59 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         executionCount: 0,
       };
       
-      const deploymentInput: WorkflowDeploymentInput = {
-        workflow_id: workflow.id,
+      // Prepare deployment input for SDK
+      const deployableWorkflow: DeployableWorkflow = {
+        id: workflow.id,
         name: workflow.name,
-        owner: connectedAddress,
-        workflow: {
-          nodes: nodes.map(n => ({
-            id: n.id,
-            type: n.type,
-            chain: n.chain,
-            config: n.config,
-            bridgeConfig: n.bridgeConfig,
-          })),
-          edges: connections.map(c => ({
-            from: c.from,
-            to: c.to,
-          })),
-          metadata: {
-            nodeCount,
-            connectionCount,
-            hasCrossChain,
+        description: workflow.description,
+        trigger: {
+          type: atomicMode ? 'atomic' : 'sequential',
+          config: {
+            gasSpeed,
+            mevStrategy: mevStrategy?.name || 'none',
+            selectedRoute: executionRoute?.name || 'optimal',
           },
         },
-        atomic_mode: atomicMode,
-        gas_speed: gasSpeed,
-        mev_strategy: mevStrategy?.name || 'none',
-        selected_route: executionRoute?.name || 'optimal',
-        deployed_at: Math.floor(Date.now() / 1000),
+        nodes: nodes.map(n => ({
+          id: n.id,
+          type: n.type,
+          data: {
+            name: n.name,
+            chain: n.chain,
+            condition: n.condition,
+            bridgeConfig: n.bridgeConfig,
+          },
+          position: n.position,
+        })),
+        edges: connections.map(c => ({
+          id: `${c.from}->${c.to}`,
+          source: c.from,
+          target: c.to,
+        })),
       };
       
-      // STEP 6: Deploy workflow via backend API
-      console.log('[Deploy] Deploying workflow via backend API...');
-      
-      // Get backend URL with explicit fallback to production URL
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
-      console.log('[Deploy] Using backend URL:', backendUrl);
+      // STEP 5: Deploy workflow via SDK (direct wallet contract execution)
+      console.log('[Deploy] Deploying workflow via WeilWallet SDK...');
       
       try {
-        const response = await fetch(`${backendUrl}/api/deploy`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(deploymentInput),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(errorData.error || errorData.message || 'Backend deployment failed');
+        const receipt = await deployWorkflow(deployableWorkflow);
+        
+        if (!receipt.success) {
+          throw new WeilExecutionError(
+            `Contract execution failed: ${(receipt as any).error || 'Unknown error'}`
+          );
         }
-
-        const result = await response.json();
-        console.log('[Deploy] ✅ Deployment successful:', result);
+        
+        console.log('[Deploy] ✅ Deployment successful:', receipt);
 
         // Show success message with transaction details
         alert(
           `✅ WORKFLOW DEPLOYED SUCCESSFULLY!\n\n` +
-          `Workflow ID: ${result.workflowId}\n` +
-          `Transaction Hash: ${result.txHash}\n` +
-          `Contract Address: ${result.contractAddress}\n` +
+          `Workflow ID: ${receipt.workflowId}\n` +
+          `Transaction Hash: ${receipt.txHash}\n` +
+          `Contract Address: ${receipt.contractAddress}\n` +
           `\n` +
-          `View on Explorer: ${result.explorer}\n` +
+          `View on Explorer: ${receipt.explorerUrl}\n` +
           `\n` +
           `Your workflow is now live on WeilChain!`
         );
@@ -527,8 +511,8 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         const savedWorkflows = JSON.parse(localStorage.getItem('savedWorkflows') || '[]');
         savedWorkflows.push({
           ...workflow,
-          txHash: result.txHash,
-          contractAddress: result.contractAddress,
+          txHash: receipt.txHash,
+          contractAddress: receipt.contractAddress,
           deployedAt: new Date().toISOString(),
         });
         localStorage.setItem('savedWorkflows', JSON.stringify(savedWorkflows));
@@ -536,18 +520,32 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
         setIsExecuting(false);
         return;
 
-      } catch (apiError: any) {
-        console.error('[Deploy] Backend API error:', apiError);
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
+      } catch (deployError: any) {
+        console.error('[Deploy] SDK deployment error:', deployError);
+        
+        // Check if it's a contract address issue
+        if (deployError.code === 'INVALID_CONTRACT_ADDRESS' || deployError.code === 'CONTRACT_ERROR' || deployError.code === 'CONTRACT_PARSE_ERROR') {
+          throw new WeilExecutionError(
+            `⚠️ CONTRACT DEPLOYMENT ISSUE\n\n` +
+            `${deployError.error || deployError.message}\n\n` +
+            `The coordinator contract at:\n${process.env.NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS}\n\n` +
+            `May not be deployed yet or may be a placeholder address.\n\n` +
+            `For development, you can:\n` +
+            `1. Deploy the coordinator contract to WeilChain\n` +
+            `2. Update NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS in .env.local\n` +
+            `3. Or set NEXT_PUBLIC_MOCK_CONTRACT=true to test without real deployment`
+          );
+        }
+        
         throw new WeilExecutionError(
-          `Backend deployment failed: ${apiError.message}\n\n` +
-          `Please check that the backend server is running at ${backendUrl}`
+          `SDK deployment failed: ${deployError.error || deployError.message}\n\n` +
+          `Ensure your WeilWallet is connected and has sufficient balance.`
         );
       }
       
     } catch (error: any) {
       // Handle deployment errors with detailed, user-friendly messages
-      console.error('[Deploy] Error generating CLI command:', error);
+      console.error('[Deploy] Deployment error:', error);
       
       let errorMessage = 'Deployment failed';
       
@@ -1219,6 +1217,31 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
               </div>
             </div>
 
+            {/* Warning Banner for Placeholder Contract */}
+            {process.env.NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS?.includes('00000') && (
+              <div className="border-2 border-yellow-500 bg-yellow-500/10 p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div className="flex-1">
+                    <div className="font-mono text-sm font-bold text-yellow-400 mb-2">
+                      DEVELOPMENT MODE - PLACEHOLDER CONTRACT
+                    </div>
+                    <div className="text-xs text-neutral-300 font-mono space-y-2">
+                      <p>The coordinator contract address is set to a placeholder:</p>
+                      <p className="text-yellow-300 font-bold">{process.env.NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS}</p>
+                      <p className="mt-2">Deployment will fail with this address. To fix:</p>
+                      <ol className="list-decimal ml-4 mt-1 space-y-1">
+                        <li>Deploy the coordinator contract to WeilChain</li>
+                        <li>Update NEXT_PUBLIC_DJED_COORDINATOR_ADDRESS in .env.local</li>
+                        <li>Restart the development server</li>
+                      </ol>
+                      <p className="mt-2">Or set <span className="text-yellow-300 font-bold">NEXT_PUBLIC_MOCK_CONTRACT=true</span> to test without deployment.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* GAS OPTIMIZATION REPORT */}
             <div className="border-2 border-[#00D4FF] bg-[#00D4FF]/5 p-6 mb-6">
               <h3 className="text-[#00D4FF] font-mono text-lg font-bold mb-4 flex items-center gap-2">
@@ -1701,103 +1724,6 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
           onStateChange={handleSimulationStateChange}
           onPlayStateChange={handlePlayStateChange}
         />
-      )}
-
-      {/* CLI Deployment Modal */}
-      {showCLIModal && cliCommand && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0a0e1a] border-2 border-cyan-500/30 rounded p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-cyan-400 mb-4">
-              🚀 Deploy via Weil CLI
-            </h2>
-            
-            <div className="text-gray-300 mb-6">
-              <p className="mb-2">WAuth does not support browser-based transactions.</p>
-              <p className="text-sm text-gray-400">
-                Use the Weil CLI to deploy your workflow on-chain.
-              </p>
-            </div>
-
-            {/* Setup Steps */}
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-cyan-400 mb-3">Setup Instructions</h3>
-              <pre className="bg-black/50 p-4 rounded text-sm text-gray-300 overflow-x-auto border border-cyan-500/20">
-                {cliCommand.setupSteps.join('\n')}
-              </pre>
-            </div>
-
-            {/* JSON File */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-cyan-400">Workflow Data ({cliCommand.jsonFile})</h3>
-                <button
-                  onClick={() => {
-                    downloadAsFile(cliCommand.jsonFile, cliCommand.jsonContent);
-                  }}
-                  className="px-3 py-1 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-sm"
-                >
-                  📥 Download JSON
-                </button>
-              </div>
-              <pre className="bg-black/50 p-4 rounded text-xs text-gray-300 overflow-x-auto border border-cyan-500/20 max-h-60">
-                {cliCommand.jsonContent}
-              </pre>
-            </div>
-
-            {/* Deployment Command */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-cyan-400">Deployment Command</h3>
-                <button
-                  onClick={async () => {
-                    try {
-                      await copyToClipboard(cliCommand.command);
-                      alert('✅ Command copied to clipboard!');
-                    } catch (err) {
-                      alert('❌ Failed to copy. Please copy manually.');
-                    }
-                  }}
-                  className="px-3 py-1 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-sm"
-                >
-                  📋 Copy Command
-                </button>
-              </div>
-              <pre className="bg-black/50 p-4 rounded text-sm text-gray-300 overflow-x-auto border border-cyan-500/20">
-                {cliCommand.command}
-              </pre>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4">
-              <button
-                onClick={() => {
-                  // Download both files
-                  downloadAsFile(cliCommand.jsonFile, cliCommand.jsonContent);
-                  downloadAsFile('deploy-command.sh', cliCommand.command);
-                  alert('✅ Files downloaded! Run deploy-command.sh in your terminal.');
-                }}
-                className="flex-1 px-4 py-3 bg-cyan-500 text-black font-bold rounded hover:bg-cyan-400 transition-all"
-              >
-                📦 Download All Files
-              </button>
-              <button
-                onClick={() => setShowCLIModal(false)}
-                className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition-all"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded">
-              <p className="text-yellow-400 text-sm">
-                <strong>💡 Tip:</strong> After running the deployment command, you can track your transaction on the{' '}
-                <a href={`https://www.unweil.me`} target="_blank" rel="noopener noreferrer" className="underline">
-                  Weil Block Explorer
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
