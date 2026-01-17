@@ -490,8 +490,11 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
       // STEP 6: Deploy workflow via backend API
       console.log('[Deploy] Deploying workflow via backend API...');
       
+      // Get backend URL with explicit fallback to production URL
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
+      console.log('[Deploy] Using backend URL:', backendUrl);
+      
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
         const response = await fetch(`${backendUrl}/api/deploy`, {
           method: 'POST',
           headers: {
@@ -535,9 +538,10 @@ export function WorkflowBuilder({ generatedWorkflow }: { generatedWorkflow?: Par
 
       } catch (apiError: any) {
         console.error('[Deploy] Backend API error:', apiError);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
         throw new WeilExecutionError(
           `Backend deployment failed: ${apiError.message}\n\n` +
-          `Please check that the backend server is running at ${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}`
+          `Please check that the backend server is running at ${backendUrl}`
         );
       }
       

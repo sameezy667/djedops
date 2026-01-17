@@ -1030,7 +1030,9 @@ export async function deployWorkflowOnWeil(
   });
   
   // Deploy via backend API instead of browser wallet
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
+  console.log('[WeilSDK] Using backend URL:', backendUrl);
+  
   const response = await fetch(`${backendUrl}/api/deploy`, {
     method: 'POST',
     headers: {

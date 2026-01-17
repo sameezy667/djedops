@@ -56,8 +56,10 @@ export interface ValidateWorkflowResponse {
 /**
  * API Client Configuration
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://djedops-backend.onrender.com';
 const API_TIMEOUT = 30000; // 30 seconds
+
+console.log('[API Client] Using backend URL:', API_BASE_URL);
 
 /**
  * HTTP request helper with timeout and error handling
